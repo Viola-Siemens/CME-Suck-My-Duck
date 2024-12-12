@@ -1,2 +1,2 @@
 # CME-Suck-My-Duck
-Output all stack trace when modifying a certain collection for debugging ConcurrentModificationException.
+Output all stack traces when modifying a certain collection for debugging ConcurrentModificationException.

@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.hexagram2021.cme_suck_my_duck'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    implementation 'org.ow2.asm:asm:9.6'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.processResources {
+    filesMatching("meta.json") {
+        expand (["version": project.version])
+    }
+}
