@@ -22,10 +22,10 @@ public class CMESuckMyDuck {
 	public static void main(String[] args) {
 		System.out.println("This project can only be used as javaagent.");
 		System.out.println("Usage:");
-		System.out.println("\t-javaagent:CMESuckMyDuck.jar=<class full name>;<field name>;<type>;<phase>");
+		System.out.println("\t-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<field name>;<type>;<phase>");
 		System.out.println("For example:");
-		System.out.println("\t-javaagent:CMESuckMyDuck.jar=org.violetmoon.zetaimplforge.event.ForgeZetaEventBus;convertedHandlers;Map;nonstatic");
-		System.out.println("Which means, each modification of map `ForgeZetaEventBus#convertedHandlers` will be traced - when add and remove is called, a stacktrace will be printed to the log.");
+		System.out.println("\t-javaagent:CMESuckMyDuck-1.0.0.jar=org/violetmoon/zetaimplforge/event/ForgeZetaEventBus;convertedHandlers;Map;nonstatic");
+		System.out.println("Which means, each modification of map `convertedHandlers`, which is a nonstatic member in `ForgeZetaEventBus`, will be traced - when add and remove is called, a stacktrace will be printed to the log.");
 		System.out.println("All valid types:");
 		for(Type type: Type.values()) {
 			System.out.printf(" -\t%s\n", type.getTypeName());
@@ -48,11 +48,12 @@ public class CMESuckMyDuck {
 		//Parse
 		String[] args = agentArg.split(";");
 		if(args.length < 4) {
-			Log.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s]", args.length, Log.buildArrayString(args));
+			Log.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
 			return;
 		}
 		//Main
 		inst.addTransformer(new DefineTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
+		Log.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 	}
 
 	record DefineTransformer(String className, String fieldName, Type type, Phase phase) implements ClassFileTransformer {
@@ -61,7 +62,6 @@ public class CMESuckMyDuck {
 			if (className.equals(this.className)) {
 				ClassReader reader = new ClassReader(classFileBuffer);
 				ClassWriter writer = new ClassWriter(reader, 0);
-				String typeFullName = "Ljava/util/" + DefineTransformer.this.type.getTypeName();
 				reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
 					@Override
 					public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
@@ -69,14 +69,15 @@ public class CMESuckMyDuck {
 
 						if(name.equals("<clinit>")) {
 							if(DefineTransformer.this.phase == Phase.STATIC) {
+								Log.info("Found injection point in method <clinit>.");
 								return new MethodVisitor(Opcodes.ASM9, mv) {
 									@Override
 									public void visitInsn(int opcode) {
 										if (opcode == Opcodes.RETURN) {
 											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type");
-											this.visitFieldInsn(Opcodes.GETSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, typeFullName);
+											this.visitFieldInsn(Opcodes.GETSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
 											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-											this.visitFieldInsn(Opcodes.PUTSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, typeFullName);
+											this.visitFieldInsn(Opcodes.PUTSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
 										}
 										super.visitInsn(opcode);
 									}
@@ -84,14 +85,15 @@ public class CMESuckMyDuck {
 							}
 						} else if(name.equals("<init>")) {
 							if(DefineTransformer.this.phase == Phase.NONSTATIC) {
+								Log.info("Found injection point in method <init>.");
 								return new MethodVisitor(Opcodes.ASM9, mv) {
 									@Override
 									public void visitInsn(int opcode) {
 										if (opcode == Opcodes.RETURN) {
 											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type");
-											this.visitFieldInsn(Opcodes.GETFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, typeFullName);
+											this.visitFieldInsn(Opcodes.GETFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
 											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-											this.visitFieldInsn(Opcodes.PUTFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, typeFullName);
+											this.visitFieldInsn(Opcodes.PUTFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
 										}
 										super.visitInsn(opcode);
 									}
@@ -107,19 +109,26 @@ public class CMESuckMyDuck {
 	}
 
 	enum Type {
-		LIST("List", Containers::newWrappedList);//, SET("Set", Containers::newWrappedSet), MAP("Map", Containers::newWrappedMap);
+		LIST("List", "Ljava/util/List", Containers::newWrappedList),
+		SET("Set", "Ljava/util/Set", Containers::newWrappedSet),
+		MAP("Map", "Ljava/util/Map", Containers::newWrappedMap);
 
 		private static final Map<String, Type> BY_NAME;
 		private final String typeName;
+		private final String typeFullClassName;
 		private final Function<Object, Object> constructor;
 
-		Type(String typeName, Function<Object, Object> constructor) {
+		Type(String typeName, String typeFullClassName, Function<Object, Object> constructor) {
 			this.typeName = typeName;
+			this.typeFullClassName = typeFullClassName;
 			this.constructor = constructor;
 		}
 
 		public String getTypeName() {
 			return this.typeName;
+		}
+		public String getTypeFullClassName() {
+			return this.typeFullClassName;
 		}
 
 		@SuppressWarnings("unused")

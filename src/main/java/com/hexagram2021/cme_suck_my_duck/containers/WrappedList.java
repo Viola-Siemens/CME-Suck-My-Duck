@@ -25,12 +25,13 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public boolean contains(Object o) {
-		Log.debug(new SuckTraceException("[Query] containsAll(Object)"));
+		Log.debug(new SuckTraceException("[Query] contains(Object)"));
 		return this.wrapped.contains(o);
 	}
 
 	@Override
 	public Iterator<T> iterator() {
+		Log.debug(new SuckTraceException("[Iteration] iterator()"));
 		return this.wrapped.iterator();
 	}
 
@@ -46,7 +47,7 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public boolean add(T t) {
-		Log.info(new SuckTraceException("[Modify] addAll(Object)"));
+		Log.info(new SuckTraceException("[Modify] add(Object)"));
 		return this.wrapped.add(t);
 	}
 
@@ -143,11 +144,13 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public ListIterator<T> listIterator() {
+		Log.debug(new SuckTraceException("[Iteration] listIterator()"));
 		return this.wrapped.listIterator();
 	}
 
 	@Override
 	public ListIterator<T> listIterator(int index) {
+		Log.debug(new SuckTraceException("[Iteration] listIterator(int)"));
 		return this.wrapped.listIterator(index);
 	}
 

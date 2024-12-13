@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Premain-Class: com.hexagram2021.cme_suck_my_duck.CMESuckMyDuck
-Main-Class: com.hexagram2021.cme_suck_my_duck.CMESuckMyDuck
-Class-Path: gson-2.8.5.jar
