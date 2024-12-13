@@ -1,12 +1,16 @@
 package com.hexagram2021.cme_suck_my_duck.utils;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Log {
@@ -28,7 +32,7 @@ public class Log {
 		try {
 			return Files.newBufferedWriter(path, StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			throw new IllegalStateException("Error setting log file: %s%n\r\n", e);
+			throw new IllegalStateException("Error setting log file: %s\n", e);
 		}
 	}
 
@@ -46,28 +50,37 @@ public class Log {
 	}
 
 	private static void log(Level level, String message) {
-		String out = String.format("[%s] [%s] [%s]: %s\r\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), message);
+		String out = String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), message);
 		if(level.level() >= LOG_LEVEL) {
 			synchronized (WRITER) {
 				try {
 					WRITER.write(out);
 					WRITER.flush();
 				} catch (Exception e) {
-					System.err.printf("Error writing log: %s%n\r\n", e);
+					System.err.printf("Error writing log: %s\n", e);
 				}
 			}
 		}
 	}
 	private static void log(Level level, Throwable t) {
+		Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
+		dejaVu.add(t);
 		synchronized (WRITER) {
 			try {
-				WRITER.write(String.format("[%s] [%s] [%s]: %s\r\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
+				WRITER.write(String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
 				StackTraceElement[] trace = t.getStackTrace();
 				for (StackTraceElement traceElement : trace) {
-					WRITER.write("\tat " + traceElement);
+					WRITER.write("\tat " + traceElement + "\n");
+				}
+				for (Throwable se : t.getSuppressed()) {
+					logEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
+				}
+				Throwable ourCause = t.getCause();
+				if (ourCause != null) {
+					logEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu);
 				}
 			} catch (Exception e) {
-				System.err.printf("Error writing log: %s%n\r\n", e);
+				System.err.printf("Error writing log: %s\n", e);
 			}
 		}
 	}
@@ -123,6 +136,44 @@ public class Log {
 	public static void fatal(Throwable t) {
 		error(t);
 		System.exit(1);
+	}
+
+	private static final String CAUSE_CAPTION = "Caused by: ";
+	private static final String SUPPRESSED_CAPTION = "Suppressed: ";
+
+	private static void logEnclosedStackTrace(Throwable t, StackTraceElement[] enclosingTrace, String caption, String prefix, Set<Throwable> dejaVu) throws IOException {
+		assert Thread.holdsLock(WRITER);
+		if (dejaVu.contains(t)) {
+			WRITER.write(prefix + caption + "[CIRCULAR REFERENCE: " + t + "]\n");
+		} else {
+			dejaVu.add(t);
+
+			StackTraceElement[] trace = t.getStackTrace();
+			int m = trace.length - 1;
+			int n = enclosingTrace.length - 1;
+			while (m >= 0 && n >=0 && trace[m].equals(enclosingTrace[n])) {
+				m--; n--;
+			}
+			int framesInCommon = trace.length - 1 - m;
+
+			WRITER.write(prefix + caption + t + "\n");
+			for (int i = 0; i <= m; i++) {
+				WRITER.write(prefix + "\tat " + trace[i] + "\n");
+			}
+			if (framesInCommon != 0) {
+				WRITER.write(prefix + "\t... " + framesInCommon + " more\n");
+			}
+
+			for (Throwable se : t.getSuppressed()) {
+				logEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu);
+			}
+
+			// Print cause, if any
+			Throwable ourCause = t.getCause();
+			if (ourCause != null) {
+				logEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu);
+			}
+		}
 	}
 
 	public static String buildArrayString(Object[] objects) {

@@ -28,11 +28,11 @@ public class CMESuckMyDuck {
 		System.out.println("Which means, each modification of map `ForgeZetaEventBus#convertedHandlers` will be traced - when add and remove is called, a stacktrace will be printed to the log.");
 		System.out.println("All valid types:");
 		for(Type type: Type.values()) {
-			System.out.printf(" -\t%s%n", type.getTypeName());
+			System.out.printf(" -\t%s\n", type.getTypeName());
 		}
 		System.out.println("All valid phases:");
 		for(Phase phase: Phase.values()) {
-			System.out.printf(" -\t%s%n", phase.getPhaseName());
+			System.out.printf(" -\t%s\n", phase.getPhaseName());
 		}
 	}
 
