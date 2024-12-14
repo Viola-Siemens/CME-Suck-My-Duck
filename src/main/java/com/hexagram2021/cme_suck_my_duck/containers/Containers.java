@@ -9,11 +9,13 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public final class Containers {
+	public static final Log logger = new Log("CMESuckMyDuck-Container.log");
+	
 	public static <T> List<T> newWrappedList(Object wrapped) {
 		try {
 			return new WrappedList<>((List<T>) wrapped);
 		} catch (ClassCastException e) {
-			Log.fatal(e);
+			logger.fatal(e);
 		}
 		return Collections.emptyList();
 	}
@@ -21,7 +23,7 @@ public final class Containers {
 		try {
 			return new WrappedSet<>((Set<T>) wrapped);
 		} catch (ClassCastException e) {
-			Log.fatal(e);
+			logger.fatal(e);
 		}
 		return Collections.emptySet();
 	}
@@ -29,7 +31,7 @@ public final class Containers {
 		try {
 			return new WrappedMap<>((Map<K, V>) wrapped);
 		} catch (ClassCastException e) {
-			Log.fatal(e);
+			logger.fatal(e);
 		}
 		return Collections.emptyMap();
 	}

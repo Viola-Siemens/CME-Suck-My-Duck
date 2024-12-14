@@ -10,14 +10,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.net.JarURLConnection;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
 public class CMESuckMyDuck {
 	public static final Gson GSON = new Gson();
+	public static final Log logger = new Log("CMESuckMyDuck.log");
 
 	public static void main(String[] args) {
 		System.out.println("This project can only be used as javaagent.");
@@ -40,20 +41,28 @@ public class CMESuckMyDuck {
 		//Pre-Load
 		try (InputStream is = CMESuckMyDuck.class.getResourceAsStream("/meta.json")) {
 			String version = GSON.fromJson(new InputStreamReader(Objects.requireNonNull(is)), JsonObject.class).get("version").getAsString();
-			Log.info(String.format("CMESuckMyDuck v%s", version));
+			logger.info(String.format("CMESuckMyDuck v%s", version));
 		} catch (Exception e) {
-			Log.error("Error getting version of CMESuckMyDuck.");
-			Log.error(e);
+			logger.error("Error getting version of CMESuckMyDuck.");
+			logger.error(e);
 		}
 		//Parse
 		String[] args = agentArg.split(";");
 		if(args.length < 4) {
-			Log.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
+			logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
 			return;
 		}
 		//Main
-		inst.addTransformer(new DefineTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
-		Log.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+		try {
+			inst.addTransformer(new DefineTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
+			JarURLConnection connection = (JarURLConnection)
+					Objects.requireNonNull(CMESuckMyDuck.class.getResource("CMESuckMyDuck.class")).openConnection();
+			inst.appendToBootstrapClassLoaderSearch(connection.getJarFile());
+		} catch (Exception e) {
+			logger.error("Failed to add jarfile to classpath.");
+			logger.fatal(e);
+		}
+		logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 	}
 
 	record DefineTransformer(String className, String fieldName, Type type, Phase phase) implements ClassFileTransformer {
@@ -69,15 +78,17 @@ public class CMESuckMyDuck {
 
 						if(name.equals("<clinit>")) {
 							if(DefineTransformer.this.phase == Phase.STATIC) {
-								Log.info("Found injection point in method <clinit>.");
+								Containers.logger.info("Found injection point in method <clinit>.");
 								return new MethodVisitor(Opcodes.ASM9, mv) {
 									@Override
 									public void visitInsn(int opcode) {
 										if (opcode == Opcodes.RETURN) {
-											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type");
+											Containers.logger.info("Injecting...");
+											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
 											this.visitFieldInsn(Opcodes.GETSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
-											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
 											this.visitFieldInsn(Opcodes.PUTSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
+											Containers.logger.info("Injected.");
 										}
 										super.visitInsn(opcode);
 									}
@@ -85,15 +96,17 @@ public class CMESuckMyDuck {
 							}
 						} else if(name.equals("<init>")) {
 							if(DefineTransformer.this.phase == Phase.NONSTATIC) {
-								Log.info("Found injection point in method <init>.");
+								Containers.logger.info("Found injection point in method <init>.");
 								return new MethodVisitor(Opcodes.ASM9, mv) {
 									@Override
 									public void visitInsn(int opcode) {
 										if (opcode == Opcodes.RETURN) {
-											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type");
+											Containers.logger.info("Injecting...");
+											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
 											this.visitFieldInsn(Opcodes.GETFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
-											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/CMESuckMyDuck$Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
 											this.visitFieldInsn(Opcodes.PUTFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
+											Containers.logger.info("Injected.");
 										}
 										super.visitInsn(opcode);
 									}
@@ -103,55 +116,12 @@ public class CMESuckMyDuck {
 						return mv;
 					}
 				}, 0);
+				return writer.toByteArray();
 			}
 			return classFileBuffer;
 		}
 	}
 
-	enum Type {
-		LIST("List", "Ljava/util/List", Containers::newWrappedList),
-		SET("Set", "Ljava/util/Set", Containers::newWrappedSet),
-		MAP("Map", "Ljava/util/Map", Containers::newWrappedMap);
-
-		private static final Map<String, Type> BY_NAME;
-		private final String typeName;
-		private final String typeFullClassName;
-		private final Function<Object, Object> constructor;
-
-		Type(String typeName, String typeFullClassName, Function<Object, Object> constructor) {
-			this.typeName = typeName;
-			this.typeFullClassName = typeFullClassName;
-			this.constructor = constructor;
-		}
-
-		public String getTypeName() {
-			return this.typeName;
-		}
-		public String getTypeFullClassName() {
-			return this.typeFullClassName;
-		}
-
-		@SuppressWarnings("unused")
-		public Object construct(Object wrapped) {
-			return this.constructor.apply(wrapped);
-		}
-
-		public static Type fromName(String typeName) {
-			Type ret = BY_NAME.get(typeName);
-			if(ret == null) {
-				Log.fatal(String.format("No type named %s!", typeName));
-				return LIST;
-			}
-			return ret;
-		}
-
-		static {
-			BY_NAME = new HashMap<>();
-			for(Type type: values()) {
-				BY_NAME.put(type.getTypeName(), type);
-			}
-		}
-	}
 	enum Phase {
 		STATIC("static"), NONSTATIC("nonstatic");
 
@@ -169,8 +139,7 @@ public class CMESuckMyDuck {
 		public static Phase fromName(String phaseName) {
 			Phase ret = BY_NAME.get(phaseName);
 			if(ret == null) {
-				Log.fatal(String.format("No phase named %s!", phaseName));
-				return STATIC;
+				throw new IllegalArgumentException(String.format("No phase named %s!", phaseName));
 			}
 			return ret;
 		}

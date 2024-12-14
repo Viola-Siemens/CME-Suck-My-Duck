@@ -13,20 +13,17 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 @SuppressWarnings("unused")
-public class Log {
+public final class Log {
 	private static final int LOG_LEVEL;
 
-	static {
-		int level = 1;
-		try {
-			level = Integer.parseInt(System.getProperty("cme_suck_my_duck.log_level"));
-		} catch (Exception ignored) {
-		}
-		LOG_LEVEL = level;
-	}
-
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private static final Writer WRITER = setLogFile(Path.of("CMESuckMyDuck.log"));
+
+	private final Writer WRITER;
+
+	public Log(String path) {
+		this.WRITER = setLogFile(Path.of(path));
+		this.info("Log level: " + LOG_LEVEL);
+	}
 
 	public static Writer setLogFile(Path path) {
 		try {
@@ -49,35 +46,37 @@ public class Log {
 		}
 	}
 
-	private static void log(Level level, String message) {
+	private void log(Level level, String message) {
 		String out = String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), message);
 		if(level.level() >= LOG_LEVEL) {
-			synchronized (WRITER) {
+			synchronized (this.WRITER) {
 				try {
-					WRITER.write(out);
-					WRITER.flush();
+					this.WRITER.write(out);
+					this.WRITER.flush();
 				} catch (Exception e) {
 					System.err.printf("Error writing log: %s\n", e);
 				}
 			}
 		}
 	}
-	private static void log(Level level, Throwable t) {
-		Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
-		dejaVu.add(t);
-		synchronized (WRITER) {
+	private void log(Level level, Throwable t) {
+		synchronized (this.WRITER) {
+			Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
+			dejaVu.add(t);
 			try {
-				WRITER.write(String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
+				this.WRITER.write(String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
+				this.WRITER.flush();
 				StackTraceElement[] trace = t.getStackTrace();
 				for (StackTraceElement traceElement : trace) {
-					WRITER.write("\tat " + traceElement + "\n");
+					this.WRITER.write("\tat " + traceElement + "\n");
 				}
+				this.WRITER.flush();
 				for (Throwable se : t.getSuppressed()) {
-					logEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
+					logEnclosedStackTrace(WRITER, se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
 				}
 				Throwable ourCause = t.getCause();
 				if (ourCause != null) {
-					logEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, "", dejaVu);
+					logEnclosedStackTrace(WRITER, ourCause, trace, CAUSE_CAPTION, "", dejaVu);
 				}
 			} catch (Exception e) {
 				System.err.printf("Error writing log: %s\n", e);
@@ -85,66 +84,67 @@ public class Log {
 		}
 	}
 
-	public static void debug(String message) {
-		log(Level.DEBUG, message);
+	public void debug(String message) {
+		this.log(Level.DEBUG, message);
 	}
-	public static void debug(String format, Object... args) {
-		debug(String.format(format, args));
+	public void debug(String format, Object... args) {
+		this.debug(String.format(format, args));
 	}
-	public static void debug(Throwable t) {
-		log(Level.DEBUG, t);
-	}
-
-	public static void info(String message) {
-		log(Level.INFO, message);
-	}
-	public static void info(String format, Object... args) {
-		info(String.format(format, args));
-	}
-	public static void info(Throwable t) {
-		log(Level.INFO, t);
+	public void debug(Throwable t) {
+		this.log(Level.DEBUG, t);
 	}
 
-	public static void warn(String message) {
-		log(Level.WARN, message);
+	public void info(String message) {
+		this.log(Level.INFO, message);
 	}
-	public static void warn(String format, Object... args) {
-		warn(String.format(format, args));
+	public void info(String format, Object... args) {
+		this.info(String.format(format, args));
 	}
-	public static void warn(Throwable t) {
-		log(Level.WARN, t);
-	}
-
-	public static void error(String message) {
-		log(Level.ERROR, message);
-	}
-	public static void error(String format, Object... args) {
-		error(String.format(format, args));
-	}
-	public static void error(Throwable t) {
-		log(Level.ERROR, t);
+	public void info(Throwable t) {
+		this.log(Level.INFO, t);
 	}
 
-	public static void fatal(String message) {
-		error(message);
+	public void warn(String message) {
+		this.log(Level.WARN, message);
+	}
+	public void warn(String format, Object... args) {
+		this.warn(String.format(format, args));
+	}
+	public void warn(Throwable t) {
+		this.log(Level.WARN, t);
+	}
+
+	public void error(String message) {
+		this.log(Level.ERROR, message);
+	}
+	public void error(String format, Object... args) {
+		this.error(String.format(format, args));
+	}
+	public void error(Throwable t) {
+		this.log(Level.ERROR, t);
+	}
+
+	public void fatal(String message) {
+		this.error(message);
 		System.exit(1);
 	}
-	public static void fatal(String format, Object... args) {
-		error(format, args);
+	public void fatal(String format, Object... args) {
+		this.error(format, args);
 		System.exit(1);
 	}
-	public static void fatal(Throwable t) {
-		error(t);
+	public void fatal(Throwable t) {
+		this.error(t);
 		System.exit(1);
 	}
 
 	private static final String CAUSE_CAPTION = "Caused by: ";
 	private static final String SUPPRESSED_CAPTION = "Suppressed: ";
 
-	private static void logEnclosedStackTrace(Throwable t, StackTraceElement[] enclosingTrace, String caption, String prefix, Set<Throwable> dejaVu) throws IOException {
-		assert Thread.holdsLock(WRITER);
+	private static void logEnclosedStackTrace(Writer writer, Throwable t, StackTraceElement[] enclosingTrace, String caption, String prefix, Set<Throwable> dejaVu) throws IOException {
+		assert Thread.holdsLock(writer);
 		if (dejaVu.contains(t)) {
-			WRITER.write(prefix + caption + "[CIRCULAR REFERENCE: " + t + "]\n");
+			writer.write(prefix + caption + "[CIRCULAR REFERENCE: " + t + "]\n");
+			writer.flush();
 		} else {
 			dejaVu.add(t);
 
@@ -156,22 +156,23 @@ public class Log {
 			}
 			int framesInCommon = trace.length - 1 - m;
 
-			WRITER.write(prefix + caption + t + "\n");
+			writer.write(prefix + caption + t + "\n");
+			writer.flush();
 			for (int i = 0; i <= m; i++) {
-				WRITER.write(prefix + "\tat " + trace[i] + "\n");
+				writer.write(prefix + "\tat " + trace[i] + "\n");
 			}
+			writer.flush();
 			if (framesInCommon != 0) {
-				WRITER.write(prefix + "\t... " + framesInCommon + " more\n");
+				writer.write(prefix + "\t... " + framesInCommon + " more\n");
 			}
+			writer.flush();
 
 			for (Throwable se : t.getSuppressed()) {
-				logEnclosedStackTrace(se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu);
+				logEnclosedStackTrace(writer, se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu);
 			}
-
-			// Print cause, if any
 			Throwable ourCause = t.getCause();
 			if (ourCause != null) {
-				logEnclosedStackTrace(ourCause, trace, CAUSE_CAPTION, prefix, dejaVu);
+				logEnclosedStackTrace(writer, ourCause, trace, CAUSE_CAPTION, prefix, dejaVu);
 			}
 		}
 	}
@@ -186,5 +187,14 @@ public class Log {
 			stringBuilder.append(objects[i].toString());
 		}
 		return stringBuilder.toString();
+	}
+
+	static {
+		int level = 1;
+		try {
+			level = Integer.parseInt(System.getProperty("cme_suck_my_duck.log_level"));
+		} catch (Exception ignored) {
+		}
+		LOG_LEVEL = level;
 	}
 }
