@@ -31,7 +31,7 @@ public class WrappedSet<T> implements Set<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		logger.debug(new SuckTraceException("[Iteration] iterator()"));
+		logger.info(new SuckTraceException("[Iteration] iterator()"));
 		return this.wrapped.iterator();
 	}
 

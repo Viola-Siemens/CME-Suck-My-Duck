@@ -10,15 +10,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
-import java.net.JarURLConnection;
+import java.nio.file.StandardOpenOption;
 import java.security.ProtectionDomain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.hexagram2021.cme_suck_my_duck.utils.SharedConstants.LOG_PATH;
+
 public class CMESuckMyDuck {
 	public static final Gson GSON = new Gson();
-	public static final Log logger = new Log("CMESuckMyDuck.log");
+	public static final Log logger = new Log(LOG_PATH, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 
 	public static void main(String[] args) {
 		System.out.println("This project can only be used as javaagent.");
@@ -53,19 +55,23 @@ public class CMESuckMyDuck {
 			return;
 		}
 		//Main
-		try {
-			inst.addTransformer(new DefineTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
-			JarURLConnection connection = (JarURLConnection)
-					Objects.requireNonNull(CMESuckMyDuck.class.getResource("CMESuckMyDuck.class")).openConnection();
-			inst.appendToBootstrapClassLoaderSearch(connection.getJarFile());
-		} catch (Exception e) {
-			logger.error("Failed to add jarfile to classpath.");
-			logger.fatal(e);
-		}
+		inst.addTransformer(new DefineTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
 		logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 	}
 
-	record DefineTransformer(String className, String fieldName, Type type, Phase phase) implements ClassFileTransformer {
+	static class DefineTransformer implements ClassFileTransformer {
+		final String className;
+		final String fieldName;
+		final Type type;
+		final Phase phase;
+
+		public DefineTransformer(String className, String fieldName, Type type, Phase phase) {
+			this.className = className;
+			this.fieldName = fieldName;
+			this.type = type;
+			this.phase = phase;
+		}
+
 		@Override
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
 			if (className.equals(this.className)) {
@@ -102,7 +108,9 @@ public class CMESuckMyDuck {
 									public void visitInsn(int opcode) {
 										if (opcode == Opcodes.RETURN) {
 											Containers.logger.info("Injecting...");
+											this.visitVarInsn(Opcodes.ALOAD, 0);
 											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
+											this.visitVarInsn(Opcodes.ALOAD, 0);
 											this.visitFieldInsn(Opcodes.GETFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
 											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
 											this.visitFieldInsn(Opcodes.PUTFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());

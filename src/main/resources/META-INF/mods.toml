@@ -1,0 +1,14 @@
+modLoader="javafml"
+loaderVersion="[0,)"
+license="AGPL-3.0"
+issueTrackerURL="https://github.com/Viola-Siemens/CME-Suck-My-Duck/issues"
+
+[[mods]]
+modId="cme_suck_my_duck"
+version="${version}"
+displayName="CME Suck My Duck"
+credits="Liu Dongyu"
+authors="Hexagram"
+description='''
+Go fuck yourself, ConcurrentModificationException and ArrayIndexOutOfBoundsException! I won't let you destroy players' game experience.
+'''

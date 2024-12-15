@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "cme_suck_my_duck",
+  "version": "${version}",
+  "name": "CME Suck My Duck",
+  "description": "Go fuck yourself, ConcurrentModificationException and ArrayIndexOutOfBoundsException! I won't let you destroy players' game experience.",
+  "authors": [
+    "Liu Dongyu"
+  ],
+  "contact": {
+    "repo": "https://github.com/Viola-Siemens/CME-Suck-My-Duck"
+  },
+  "license": "AGPL-3.0",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.hexagram2021.cme_suck_my_duck.CMESuckFabricMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "*"
+  }
+}

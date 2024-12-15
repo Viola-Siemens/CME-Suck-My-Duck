@@ -1,10 +1,13 @@
 package com.hexagram2021.cme_suck_my_duck.utils;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -14,20 +17,24 @@ import java.util.Set;
 
 @SuppressWarnings("unused")
 public final class Log {
+	@Nullable
+	public static Log INSTANCE = null;
 	private static final int LOG_LEVEL;
 
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private final Writer WRITER;
 
-	public Log(String path) {
-		this.WRITER = setLogFile(Path.of(path));
+	public Log(String path, StandardOpenOption... openOptions) {
+		this.WRITER = setLogFile(Paths.get(path), openOptions);
 		this.info("Log level: " + LOG_LEVEL);
+
+		INSTANCE = this;
 	}
 
-	public static Writer setLogFile(Path path) {
+	public static Writer setLogFile(Path path, StandardOpenOption... openOptions) {
 		try {
-			return Files.newBufferedWriter(path, StandardCharsets.UTF_8);
+			return Files.newBufferedWriter(path, StandardCharsets.UTF_8, openOptions);
 		} catch (Exception e) {
 			throw new IllegalStateException("Error setting log file: %s\n", e);
 		}

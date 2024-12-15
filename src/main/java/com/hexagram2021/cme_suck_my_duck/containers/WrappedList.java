@@ -32,7 +32,7 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		logger.debug(new SuckTraceException("[Iteration] iterator()"));
+		logger.info(new SuckTraceException("[Iteration] iterator()"));
 		return this.wrapped.iterator();
 	}
 
@@ -145,13 +145,13 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public ListIterator<T> listIterator() {
-		logger.debug(new SuckTraceException("[Iteration] listIterator()"));
+		logger.info(new SuckTraceException("[Iteration] listIterator()"));
 		return this.wrapped.listIterator();
 	}
 
 	@Override
 	public ListIterator<T> listIterator(int index) {
-		logger.debug(new SuckTraceException("[Iteration] listIterator(int)"));
+		logger.info(new SuckTraceException("[Iteration] listIterator(int)"));
 		return this.wrapped.listIterator(index);
 	}
 
