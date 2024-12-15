@@ -66,6 +66,7 @@ jar {
                 "Can-Retransform-Classes"   : "true"
         ])
     }
+    from("LICENSE")
 }
 
 test {
