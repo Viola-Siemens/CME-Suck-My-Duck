@@ -76,7 +76,7 @@ public class CMESuckMyDuck {
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
 			if (className.equals(this.className)) {
 				ClassReader reader = new ClassReader(classFileBuffer);
-				ClassWriter writer = new ClassWriter(reader, 0);
+				ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
 				reader.accept(new ClassVisitor(Opcodes.ASM9, writer) {
 					@Override
 					public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {

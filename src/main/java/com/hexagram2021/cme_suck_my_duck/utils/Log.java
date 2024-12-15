@@ -54,10 +54,10 @@ public final class Log {
 	}
 
 	private void log(Level level, String message) {
-		String out = String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), message);
 		if(level.level() >= LOG_LEVEL) {
 			synchronized (this.WRITER) {
 				try {
+					String out = String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), message);
 					this.WRITER.write(out);
 					this.WRITER.flush();
 				} catch (Exception e) {
@@ -67,26 +67,28 @@ public final class Log {
 		}
 	}
 	private void log(Level level, Throwable t) {
-		synchronized (this.WRITER) {
-			Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
-			dejaVu.add(t);
-			try {
-				this.WRITER.write(String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
-				this.WRITER.flush();
-				StackTraceElement[] trace = t.getStackTrace();
-				for (StackTraceElement traceElement : trace) {
-					this.WRITER.write("\tat " + traceElement + "\n");
+		if(level.level() >= LOG_LEVEL) {
+			synchronized (this.WRITER) {
+				try {
+					Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
+					dejaVu.add(t);
+					this.WRITER.write(String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
+					this.WRITER.flush();
+					StackTraceElement[] trace = t.getStackTrace();
+					for (StackTraceElement traceElement : trace) {
+						this.WRITER.write("\tat " + traceElement + "\n");
+					}
+					this.WRITER.flush();
+					for (Throwable se : t.getSuppressed()) {
+						logEnclosedStackTrace(WRITER, se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
+					}
+					Throwable ourCause = t.getCause();
+					if (ourCause != null) {
+						logEnclosedStackTrace(WRITER, ourCause, trace, CAUSE_CAPTION, "", dejaVu);
+					}
+				} catch (Exception e) {
+					System.err.printf("Error writing log: %s\n", e);
 				}
-				this.WRITER.flush();
-				for (Throwable se : t.getSuppressed()) {
-					logEnclosedStackTrace(WRITER, se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
-				}
-				Throwable ourCause = t.getCause();
-				if (ourCause != null) {
-					logEnclosedStackTrace(WRITER, ourCause, trace, CAUSE_CAPTION, "", dejaVu);
-				}
-			} catch (Exception e) {
-				System.err.printf("Error writing log: %s\n", e);
 			}
 		}
 	}
