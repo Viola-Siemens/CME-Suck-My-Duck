@@ -2,6 +2,7 @@ modLoader="javafml"
 loaderVersion="[0,)"
 license="AGPL-3.0"
 issueTrackerURL="https://github.com/Viola-Siemens/CME-Suck-My-Duck/issues"
+logoFile="logo.png"
 
 [[mods]]
 modId="cme_suck_my_duck"

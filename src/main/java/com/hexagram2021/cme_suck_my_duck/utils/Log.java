@@ -21,7 +21,7 @@ public final class Log {
 	public static Log INSTANCE = null;
 	private static final int LOG_LEVEL;
 
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private final Writer WRITER;
 

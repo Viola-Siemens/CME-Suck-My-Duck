@@ -11,6 +11,7 @@
     "repo": "https://github.com/Viola-Siemens/CME-Suck-My-Duck"
   },
   "license": "AGPL-3.0",
+  "icon": "logo.png",
   "environment": "*",
   "entrypoints": {
     "main": [

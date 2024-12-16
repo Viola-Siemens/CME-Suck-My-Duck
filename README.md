@@ -24,7 +24,7 @@ For NeoForge, use official name.
 
 ### \<type\>
 
-Currently we only support three containers: `List`, `Set`, `Map`. This argument indicates the type of monitored container.
+Currently, we only support three containers: `List`, `Set`, `Map`. This argument indicates the type of monitored container.
 
 ### \<phase\>
 
