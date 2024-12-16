@@ -11,5 +11,5 @@ displayName="CME Suck My Duck"
 credits="Liu Dongyu"
 authors="Hexagram"
 description='''
-Go fuck yourself, ConcurrentModificationException and ArrayIndexOutOfBoundsException! I won't let you destroy players' game experience.
+Go f**k yourself, ConcurrentModificationException and IndexOutOfBoundsException! I won't let you destroy players' game experience.
 '''

@@ -3,7 +3,7 @@
   "id": "cme_suck_my_duck",
   "version": "${version}",
   "name": "CME Suck My Duck",
-  "description": "Go fuck yourself, ConcurrentModificationException and ArrayIndexOutOfBoundsException! I won't let you destroy players' game experience.",
+  "description": "Go f**k yourself, ConcurrentModificationException and IndexOutOfBoundsException! I won't let you destroy players' game experience.",
   "authors": [
     "Liu Dongyu"
   ],
