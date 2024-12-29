@@ -42,7 +42,7 @@ public final class Log {
 		}
 	}
 
-	enum Level {
+	public enum Level {
 		DEBUG(0), INFO(1), WARN(2), ERROR(3);
 
 		final int level;
@@ -146,6 +146,10 @@ public final class Log {
 	public void fatal(Throwable t) {
 		this.error(t);
 		System.exit(1);
+	}
+
+	public static String newDate() {
+		return DATE_FORMAT.format(new Date());
 	}
 
 	private static final String CAUSE_CAPTION = "Caused by: ";

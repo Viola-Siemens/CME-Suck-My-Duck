@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "cme_suck_my_duck",
+    "name": "CME Suck My Duck",
+    "description": "Go f**k yourself, ConcurrentModificationException and IndexOutOfBoundsException! I won't let you destroy players' game experience.",
+    "version": "${version}",
+    "mcversion": "[0, 2)",
+    "url": "https://github.com/Viola-Siemens/CME-Suck-My-Duck",
+    "updateUrl": "",
+    "authorList": ["Hexagram"],
+    "credits": "Liu Dongyu",
+    "logoFile": "logo.png",
+    "screenshots": [],
+    "dependencies": []
+  }
+]

@@ -45,7 +45,7 @@ dependencies {
     implementation 'org.ow2.asm:asm:9.6'
 
     compileOnly 'net.fabricmc:fabric-loader:0.15.11'
-    compileOnly 'net.minecraftforge:javafmllanguage:1.20.1-47.2.0'
+    //compileOnly 'net.minecraftforge:javafmllanguage:1.12.2-14.23.5.2859'
     compileOnly 'net.neoforged.fancymodloader:loader:2.0.20'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
@@ -55,7 +55,7 @@ dependencies {
 sourceSets {
     main {
         resources {
-            srcDirs += 'src/main/resources'
+            srcDirs 'src/main/resources'
         }
     }
 }
@@ -80,6 +80,9 @@ test {
 
 tasks.processResources {
     filesMatching("*.json") {
+        expand (["version": project.version])
+    }
+    filesMatching("mcmod.info") {
         expand (["version": project.version])
     }
     filesMatching("META-INF/*.toml") {
