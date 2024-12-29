@@ -72,6 +72,7 @@ jar {
         ])
     }
     from "LICENSE"
+    exclude 'net/**'
 }
 
 test {
