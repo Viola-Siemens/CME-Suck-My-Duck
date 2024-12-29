@@ -3,9 +3,14 @@ plugins {
 }
 
 group = 'com.hexagram2021.cme_suck_my_duck'
-version = '1.0.0'
+version = '1.0.1'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+compileJava {
+    sourceCompatibility = 8
+    targetCompatibility = 8
+}
+
+java.disableAutoTargetJvm()
 
 repositories {
     mavenCentral()

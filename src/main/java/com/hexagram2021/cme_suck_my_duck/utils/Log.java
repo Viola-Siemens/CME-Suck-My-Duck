@@ -1,5 +1,7 @@
 package com.hexagram2021.cme_suck_my_duck.utils;
 
+import com.hexagram2021.cme_suck_my_duck.log.AbstractLogEntry;
+
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
@@ -10,19 +12,19 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.IdentityHashMap;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @SuppressWarnings("unused")
 public final class Log {
 	@Nullable
 	public static Log INSTANCE = null;
 	private static final int LOG_LEVEL;
+	private static final Thread LOG_THREAD;
 
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
+	private final Queue<AbstractLogEntry> TO_LOGS = new ConcurrentLinkedDeque<>();
 	private final Writer WRITER;
 
 	public Log(String path, StandardOpenOption... openOptions) {
@@ -205,5 +207,10 @@ public final class Log {
 		} catch (Exception ignored) {
 		}
 		LOG_LEVEL = level;
+		LOG_THREAD = new Thread(Log::logThread, "CMESuckMyDuck-Log");
+		LOG_THREAD.start();
+	}
+
+	private static void logThread() {
 	}
 }
