@@ -1,9 +1,10 @@
 package com.hexagram2021.cme_suck_my_duck.utils;
 
 import com.hexagram2021.cme_suck_my_duck.log.AbstractLogEntry;
+import com.hexagram2021.cme_suck_my_duck.log.StringLogEntry;
+import com.hexagram2021.cme_suck_my_duck.log.ThrowableLogEntry;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -57,41 +58,12 @@ public final class Log {
 
 	private void log(Level level, String message) {
 		if(level.level() >= LOG_LEVEL) {
-			synchronized (this.WRITER) {
-				try {
-					String out = String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), message);
-					this.WRITER.write(out);
-					this.WRITER.flush();
-				} catch (Exception e) {
-					System.err.printf("Error writing log: %s\n", e);
-				}
-			}
+			this.TO_LOGS.add(new StringLogEntry(level.name(), message));
 		}
 	}
 	private void log(Level level, Throwable t) {
 		if(level.level() >= LOG_LEVEL) {
-			synchronized (this.WRITER) {
-				try {
-					Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
-					dejaVu.add(t);
-					this.WRITER.write(String.format("[%s] [%s] [%s]: %s\n", DATE_FORMAT.format(new Date()), Thread.currentThread().getName(), level.name(), t));
-					this.WRITER.flush();
-					StackTraceElement[] trace = t.getStackTrace();
-					for (StackTraceElement traceElement : trace) {
-						this.WRITER.write("\tat " + traceElement + "\n");
-					}
-					this.WRITER.flush();
-					for (Throwable se : t.getSuppressed()) {
-						logEnclosedStackTrace(WRITER, se, trace, SUPPRESSED_CAPTION, "\t", dejaVu);
-					}
-					Throwable ourCause = t.getCause();
-					if (ourCause != null) {
-						logEnclosedStackTrace(WRITER, ourCause, trace, CAUSE_CAPTION, "", dejaVu);
-					}
-				} catch (Exception e) {
-					System.err.printf("Error writing log: %s\n", e);
-				}
-			}
+			this.TO_LOGS.add(new ThrowableLogEntry(level.name(), t));
 		}
 	}
 
@@ -152,46 +124,6 @@ public final class Log {
 		return DATE_FORMAT.format(new Date());
 	}
 
-	private static final String CAUSE_CAPTION = "Caused by: ";
-	private static final String SUPPRESSED_CAPTION = "Suppressed: ";
-
-	private static void logEnclosedStackTrace(Writer writer, Throwable t, StackTraceElement[] enclosingTrace, String caption, String prefix, Set<Throwable> dejaVu) throws IOException {
-		assert Thread.holdsLock(writer);
-		if (dejaVu.contains(t)) {
-			writer.write(prefix + caption + "[CIRCULAR REFERENCE: " + t + "]\n");
-			writer.flush();
-		} else {
-			dejaVu.add(t);
-
-			StackTraceElement[] trace = t.getStackTrace();
-			int m = trace.length - 1;
-			int n = enclosingTrace.length - 1;
-			while (m >= 0 && n >=0 && trace[m].equals(enclosingTrace[n])) {
-				m--; n--;
-			}
-			int framesInCommon = trace.length - 1 - m;
-
-			writer.write(prefix + caption + t + "\n");
-			writer.flush();
-			for (int i = 0; i <= m; i++) {
-				writer.write(prefix + "\tat " + trace[i] + "\n");
-			}
-			writer.flush();
-			if (framesInCommon != 0) {
-				writer.write(prefix + "\t... " + framesInCommon + " more\n");
-			}
-			writer.flush();
-
-			for (Throwable se : t.getSuppressed()) {
-				logEnclosedStackTrace(writer, se, trace, SUPPRESSED_CAPTION, prefix + "\t", dejaVu);
-			}
-			Throwable ourCause = t.getCause();
-			if (ourCause != null) {
-				logEnclosedStackTrace(writer, ourCause, trace, CAUSE_CAPTION, prefix, dejaVu);
-			}
-		}
-	}
-
 	public static String buildArrayString(Object[] objects) {
 		if(objects.length == 0) {
 			return "";
@@ -213,8 +145,34 @@ public final class Log {
 		LOG_LEVEL = level;
 		LOG_THREAD = new Thread(Log::logThread, "CMESuckMyDuck-Log");
 		LOG_THREAD.start();
+		Thread currentThread = Thread.currentThread();
+		Thread callback = new Thread(() -> {
+			try {
+				currentThread.join();
+			} catch (InterruptedException ignored) {
+			}
+			if(INSTANCE != null) {
+				INSTANCE.info("Main thread (" + currentThread.getName() + ") is stopped. Log thread is stopping.");
+			}
+			exit = true;
+		}, "CMESuckMyDuck-Callback");
 	}
 
+	private static boolean exit = false;
 	private static void logThread() {
+		while(!exit) {
+			try {
+				Thread.sleep(2000L);
+				if(INSTANCE == null) {
+					continue;
+				}
+				while(!INSTANCE.TO_LOGS.isEmpty()) {
+					AbstractLogEntry entry = INSTANCE.TO_LOGS.poll();
+					entry.writeTo(INSTANCE.WRITER);
+				}
+			} catch (Exception e) {
+				System.err.printf("Error writing log: %s\n", e);
+			}
+		}
 	}
 }

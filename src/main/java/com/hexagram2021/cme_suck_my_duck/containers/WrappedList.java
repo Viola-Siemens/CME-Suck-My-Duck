@@ -11,7 +11,11 @@ public class WrappedList<T> implements List<T> {
 	final List<T> wrapped;
 
 	WrappedList(List<T> wrapped) {
-		this.wrapped = wrapped;
+		if(wrapped instanceof WrappedList) {
+			this.wrapped = ((WrappedList<T>)wrapped).wrapped;
+		} else {
+			this.wrapped = wrapped;
+		}
 	}
 
 	@Override

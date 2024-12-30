@@ -12,7 +12,11 @@ public class WrappedMap<K, V> implements Map<K, V> {
 	final Map<K, V> wrapped;
 
 	public WrappedMap(Map<K, V> wrapped) {
-		this.wrapped = wrapped;
+		if(wrapped instanceof WrappedMap) {
+			this.wrapped = ((WrappedMap<K, V>)wrapped).wrapped;
+		} else {
+			this.wrapped = wrapped;
+		}
 	}
 
 	@Override

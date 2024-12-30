@@ -10,7 +10,11 @@ public class WrappedSet<T> implements Set<T> {
 	final Set<T> wrapped;
 
 	WrappedSet(Set<T> wrapped) {
-		this.wrapped = wrapped;
+		if(wrapped instanceof WrappedSet) {
+			this.wrapped = ((WrappedSet<T>)wrapped).wrapped;
+		} else {
+			this.wrapped = wrapped;
+		}
 	}
 
 	@Override
