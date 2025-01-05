@@ -21,7 +21,9 @@ public final class Log {
 	@Nullable
 	public static Log INSTANCE = null;
 	private static final int LOG_LEVEL;
+	private static final long LOG_WAIT_TIME;
 	private static final Thread LOG_THREAD;
+	private static final Thread MAIN_TRHEAD;
 
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
@@ -143,26 +145,22 @@ public final class Log {
 		} catch (Exception ignored) {
 		}
 		LOG_LEVEL = level;
+		long logWaitTime = 1000L;
+		try {
+			logWaitTime = Long.parseLong(System.getProperty("cme_suck_my_duck.log_wait_time"));
+		} catch (Exception ignored) {
+		}
+		LOG_WAIT_TIME = logWaitTime;
 		LOG_THREAD = new Thread(Log::logThread, "CMESuckMyDuck-Log");
 		LOG_THREAD.start();
-		Thread currentThread = Thread.currentThread();
-		Thread callback = new Thread(() -> {
-			try {
-				currentThread.join();
-			} catch (InterruptedException ignored) {
-			}
-			if(INSTANCE != null) {
-				INSTANCE.info("Main thread (" + currentThread.getName() + ") is stopped. Log thread is stopping.");
-			}
-			exit = true;
-		}, "CMESuckMyDuck-Callback");
+		MAIN_TRHEAD = Thread.currentThread();
 	}
 
 	private static boolean exit = false;
 	private static void logThread() {
 		while(!exit) {
 			try {
-				Thread.sleep(2000L);
+				Thread.sleep(LOG_WAIT_TIME);
 				if(INSTANCE == null) {
 					continue;
 				}
@@ -173,6 +171,9 @@ public final class Log {
 			} catch (Exception e) {
 				System.err.printf("Error writing log: %s\n", e);
 			}
+		}
+		if(INSTANCE != null) {
+			INSTANCE.info("Main thread (" + MAIN_TRHEAD.getName() + ") stopped. Log thread is stopping.");
 		}
 	}
 }

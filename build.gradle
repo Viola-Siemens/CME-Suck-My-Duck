@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.hexagram2021.cme_suck_my_duck'
-version = '1.0.2'
+version = '1.0.3'
 
 compileJava {
     sourceCompatibility = 8
@@ -52,13 +52,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
-sourceSets {
-    main {
-        resources {
-            srcDirs 'src/main/resources'
-        }
-    }
-}
+sourceSets.main.resources { srcDir 'src/main/resources' }
 
 jar {
     manifest {
@@ -89,4 +83,8 @@ tasks.processResources {
     filesMatching("META-INF/*.toml") {
         expand (["version": project.version])
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
