@@ -7,10 +7,7 @@ import com.hexagram2021.cme_suck_my_duck.log.ThrowableLogEntry;
 import javax.annotation.Nullable;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,26 +19,36 @@ public final class Log {
 	public static Log INSTANCE = null;
 	private static final int LOG_LEVEL;
 	private static final long LOG_WAIT_TIME;
+	private static final int FILE_MAX_ENTRIES;
 	private static final Thread LOG_THREAD;
-	private static final Thread MAIN_TRHEAD;
+	private static final Thread MAIN_THREAD;
 
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private final Queue<AbstractLogEntry> TO_LOGS = new ConcurrentLinkedDeque<>();
-	private final Writer WRITER;
+	private final String path;
+	private final StandardOpenOption[] openOptions;
+	private Writer WRITER;
 
 	public Log(String path, StandardOpenOption... openOptions) {
-		this.WRITER = setLogFile(Paths.get(path), openOptions);
+		this.path = path;
+		this.openOptions = openOptions;
+		this.WRITER = this.setLogFile();
 		this.info("Log level: " + LOG_LEVEL);
 
 		INSTANCE = this;
+	}
+
+	private Writer setLogFile() {
+		return setLogFile(Paths.get(this.path + ".log"), this.openOptions);
 	}
 
 	public static Writer setLogFile(Path path, StandardOpenOption... openOptions) {
 		try {
 			return Files.newBufferedWriter(path, StandardCharsets.UTF_8, openOptions);
 		} catch (Exception e) {
-			throw new IllegalStateException("Error setting log file: %s\n", e);
+			//e.printStackTrace();
+			throw new IllegalStateException("Error setting log file.\n", e);
 		}
 	}
 
@@ -111,14 +118,29 @@ public final class Log {
 
 	public void fatal(String message) {
 		this.error(message);
-		System.exit(1);
+		exit = true;
+		try {
+			LOG_THREAD.join();
+		} catch (InterruptedException ignored) {
+		}
+		//System.exit(1);
 	}
 	public void fatal(String format, Object... args) {
 		this.error(format, args);
-		System.exit(1);
+		exit = true;
+		try {
+			LOG_THREAD.join();
+		} catch (InterruptedException ignored) {
+		}
+		//System.exit(1);
 	}
 	public void fatal(Throwable t) {
 		this.error(t);
+		exit = true;
+		try {
+			LOG_THREAD.join();
+		} catch (InterruptedException ignored) {
+		}
 		System.exit(1);
 	}
 
@@ -151,13 +173,22 @@ public final class Log {
 		} catch (Exception ignored) {
 		}
 		LOG_WAIT_TIME = logWaitTime;
+		int fileMaxEntries = 500;
+		try {
+			fileMaxEntries = Integer.parseInt(System.getProperty("cme_suck_my_duck.file_max_entries"));
+		} catch (Exception ignored) {
+		}
+		FILE_MAX_ENTRIES = fileMaxEntries;
 		LOG_THREAD = new Thread(Log::logThread, "CMESuckMyDuck-Log");
+		LOG_THREAD.setDaemon(true);
 		LOG_THREAD.start();
-		MAIN_TRHEAD = Thread.currentThread();
+		MAIN_THREAD = Thread.currentThread();
 	}
 
 	private static boolean exit = false;
+	@SuppressWarnings("BusyWait")
 	private static void logThread() {
+		int lines = 0;
 		while(!exit) {
 			try {
 				Thread.sleep(LOG_WAIT_TIME);
@@ -167,13 +198,25 @@ public final class Log {
 				while(!INSTANCE.TO_LOGS.isEmpty()) {
 					AbstractLogEntry entry = INSTANCE.TO_LOGS.poll();
 					entry.writeTo(INSTANCE.WRITER);
+					lines += 1;
+					if(lines >= FILE_MAX_ENTRIES) {
+						INSTANCE.WRITER.close();
+						Files.move(Paths.get(INSTANCE.path + ".log"), Paths.get(INSTANCE.path + "-old.log"), StandardCopyOption.REPLACE_EXISTING);
+						INSTANCE.WRITER = INSTANCE.setLogFile();
+						lines = 0;
+					}
 				}
 			} catch (Exception e) {
 				System.err.printf("Error writing log: %s\n", e);
 			}
 		}
-		if(INSTANCE != null) {
-			INSTANCE.info("Main thread (" + MAIN_TRHEAD.getName() + ") stopped. Log thread is stopping.");
+		try {
+			if (INSTANCE != null) {
+				AbstractLogEntry entry = new StringLogEntry(Level.INFO.name(), "Main thread (" + MAIN_THREAD.getName() + ") stopped. Log thread is stopping.");
+				entry.writeTo(INSTANCE.WRITER);
+				INSTANCE.WRITER.close();
+			}
+		} catch (Exception ignored) {
 		}
 	}
 }

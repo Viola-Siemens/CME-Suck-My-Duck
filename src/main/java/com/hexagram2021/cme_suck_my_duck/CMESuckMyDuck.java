@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.hexagram2021.cme_suck_my_duck.containers.Containers;
 import com.hexagram2021.cme_suck_my_duck.utils.Log;
+import com.hexagram2021.cme_suck_my_duck.utils.SharedConstants;
 import org.objectweb.asm.*;
 
+import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
@@ -28,7 +30,7 @@ public class CMESuckMyDuck {
 		System.out.println("Usage:");
 		System.out.println("\t-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<field name>;<type>;<phase>");
 		System.out.println("For example:");
-		System.out.println("\t-javaagent:CMESuckMyDuck-1.0.0.jar=org/violetmoon/zetaimplforge/event/ForgeZetaEventBus;convertedHandlers;Map;nonstatic");
+		System.out.println("\t-javaagent:CMESuckMyDuck-" + SharedConstants.VERSION + ".jar=org/violetmoon/zetaimplforge/event/ForgeZetaEventBus;convertedHandlers;Map;nonstatic");
 		System.out.println("Which means, each modification of map `convertedHandlers`, which is a nonstatic member in `ForgeZetaEventBus`, will be traced - when add and remove is called, a stacktrace will be printed to the log.");
 		System.out.println("All valid types:");
 		for(Type type: Type.values()) {
@@ -127,6 +129,32 @@ public class CMESuckMyDuck {
 							}
 							return mv;
 						}
+
+						@Override @Nullable
+						public FieldVisitor visitField(int access, String name, String descriptor, @Nullable String signature, @Nullable Object value) {
+							Containers.logger.debug("Visit field " + name + ".");
+
+							if(name.equals(DefineTransformer.this.fieldName)) {
+								boolean isStatic = ((access & Opcodes.ACC_STATIC) != 0);
+								if(DefineTransformer.this.phase.isStatic() != isStatic) {
+									Containers.logger.fatal(
+											"Failed to verify phase. Expected: %s. Found: %s.",
+											DefineTransformer.this.phase.getPhaseName(),
+											isStatic ? "static" : "nonstatic"
+									);
+								} else {
+									if(!descriptor.equals(DefineTransformer.this.type.getTypeFullClassName())) {
+										Containers.logger.fatal(
+												"Failed to verify type. Expected: %s. Found: %s.",
+												DefineTransformer.this.type.getTypeFullClassName(),
+												descriptor
+										);
+									}
+								}
+							}
+
+							return super.visitField(access, name, descriptor, signature, value);
+						}
 					}, 0);
 					return writer.toByteArray();
 				} catch(Exception e) {
@@ -157,6 +185,10 @@ public class CMESuckMyDuck {
 				throw new IllegalArgumentException(String.format("No phase named %s!", phaseName));
 			}
 			return ret;
+		}
+
+		public boolean isStatic() {
+			return this == STATIC;
 		}
 
 		static {

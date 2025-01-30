@@ -44,7 +44,7 @@ public final class Containers {
 
 	static {
 		if(Log.INSTANCE == null) {
-			logger = new Log(LOG_PATH, StandardOpenOption.APPEND);
+			logger = new Log(LOG_PATH, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} else {
 			logger = Log.INSTANCE;
 		}
