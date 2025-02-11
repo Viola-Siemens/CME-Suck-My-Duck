@@ -20,6 +20,8 @@ public final class Log {
 	private static final int LOG_LEVEL;
 	private static final long LOG_WAIT_TIME;
 	private static final int FILE_MAX_ENTRIES;
+	@Nullable
+	private static final String WHITELIST_CONSTRUCTOR_STACKTRACE;
 	private static final Thread LOG_THREAD;
 	private static final Thread MAIN_THREAD;
 
@@ -179,10 +181,24 @@ public final class Log {
 		} catch (Exception ignored) {
 		}
 		FILE_MAX_ENTRIES = fileMaxEntries;
+		WHITELIST_CONSTRUCTOR_STACKTRACE = System.getProperty("cme_suck_my_duck.whitelist_constructor_stacktrace");
 		LOG_THREAD = new Thread(Log::logThread, "CMESuckMyDuck-Log");
 		LOG_THREAD.setDaemon(true);
 		LOG_THREAD.start();
 		MAIN_THREAD = Thread.currentThread();
+	}
+
+	public static boolean canWrap() {
+		if(WHITELIST_CONSTRUCTOR_STACKTRACE == null) {
+			return true;
+		}
+		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+		for (StackTraceElement element: stackTrace) {
+			if(element.toString().contains(WHITELIST_CONSTRUCTOR_STACKTRACE)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private static boolean exit = false;

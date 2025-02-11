@@ -16,7 +16,10 @@ public final class Containers {
 	
 	public static <T> List<T> newWrappedList(Object wrapped) {
 		try {
-			return new WrappedList<>((List<T>) wrapped);
+			if(Log.canWrap()) {
+				return new WrappedList<>((List<T>) wrapped);
+			}
+			return (List<T>) wrapped;
 		} catch (ClassCastException e) {
 			logger.fatal(e);
 		}
@@ -24,7 +27,10 @@ public final class Containers {
 	}
 	public static <T> Set<T> newWrappedSet(Object wrapped) {
 		try {
-			return new WrappedSet<>((Set<T>) wrapped);
+			if(Log.canWrap()) {
+				return new WrappedSet<>((Set<T>) wrapped);
+			}
+			return (Set<T>) wrapped;
 		} catch (ClassCastException e) {
 			logger.fatal(e);
 		}
@@ -32,7 +38,10 @@ public final class Containers {
 	}
 	public static <K, V> Map<K, V> newWrappedMap(Object wrapped) {
 		try {
-			return new WrappedMap<>((Map<K, V>) wrapped);
+			if(Log.canWrap()) {
+				return new WrappedMap<>((Map<K, V>) wrapped);
+			}
+			return (Map<K, V>) wrapped;
 		} catch (ClassCastException e) {
 			logger.fatal(e);
 		}
