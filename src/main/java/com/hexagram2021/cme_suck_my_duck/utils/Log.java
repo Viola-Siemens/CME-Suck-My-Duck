@@ -175,7 +175,7 @@ public final class Log {
 		} catch (Exception ignored) {
 		}
 		LOG_WAIT_TIME = logWaitTime;
-		int fileMaxEntries = 500;
+		int fileMaxEntries = 1000;
 		try {
 			fileMaxEntries = Integer.parseInt(System.getProperty("cme_suck_my_duck.file_max_entries"));
 		} catch (Exception ignored) {

@@ -24,6 +24,7 @@ public class CMESuckMyDuck {
 	public static final Gson GSON = new Gson();
 	public static final Log logger = new Log(LOG_PATH, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
 	public static final int ASM_API_VERSION;
+	public static final boolean INJECT_METHOD;
 
 	public static void main(String[] args) {
 		System.out.println("This project can only be used as javaagent.");
@@ -51,24 +52,35 @@ public class CMESuckMyDuck {
 			logger.error("Error getting version of CMESuckMyDuck.");
 			logger.error(e);
 		}
-		//Parse
-		String[] args = agentArg.split(";");
-		if(args.length < 4) {
-			logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
-			return;
+
+		if(INJECT_METHOD) {
+			String[] args = agentArg.split(";");
+			if (args.length < 2) {
+				logger.error("Failed to parse agent arguments. Expect 2 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
+				return;
+			}
+			inst.addTransformer(new InjectLogTransformer(args[0], args[1]), true);
+			logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+		} else {
+			//Parse
+			String[] args = agentArg.split(";");
+			if (args.length < 4) {
+				logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
+				return;
+			}
+			//Main
+			inst.addTransformer(new WrapContainerTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
+			logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 		}
-		//Main
-		inst.addTransformer(new DefineTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
-		logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 	}
 
-	static class DefineTransformer implements ClassFileTransformer {
+	static class WrapContainerTransformer implements ClassFileTransformer {
 		final String className;
 		final String fieldName;
 		final Type type;
 		final Phase phase;
 
-		public DefineTransformer(String className, String fieldName, Type type, Phase phase) {
+		public WrapContainerTransformer(String className, String fieldName, Type type, Phase phase) {
 			this.className = className;
 			this.fieldName = fieldName;
 			this.type = type;
@@ -89,17 +101,17 @@ public class CMESuckMyDuck {
 							MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
 
 							if (name.equals("<clinit>")) {
-								if (DefineTransformer.this.phase == Phase.STATIC) {
+								if (WrapContainerTransformer.this.phase == Phase.STATIC) {
 									Containers.logger.info("Found injection point in method <clinit>.");
 									return new MethodVisitor(ASM_API_VERSION, mv) {
 										@Override
 										public void visitInsn(int opcode) {
 											if (opcode == Opcodes.RETURN) {
 												Containers.logger.info("Injecting...");
-												this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
-												this.visitFieldInsn(Opcodes.GETSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
+												this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
+												this.visitFieldInsn(Opcodes.GETSTATIC, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
 												this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-												this.visitFieldInsn(Opcodes.PUTSTATIC, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
+												this.visitFieldInsn(Opcodes.PUTSTATIC, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
 												Containers.logger.info("Injected.");
 											}
 											super.visitInsn(opcode);
@@ -107,7 +119,7 @@ public class CMESuckMyDuck {
 									};
 								}
 							} else if (name.equals("<init>")) {
-								if (DefineTransformer.this.phase == Phase.NONSTATIC) {
+								if (WrapContainerTransformer.this.phase == Phase.NONSTATIC) {
 									Containers.logger.info("Found injection point in method <init>.");
 									return new MethodVisitor(ASM_API_VERSION, mv) {
 										@Override
@@ -115,11 +127,11 @@ public class CMESuckMyDuck {
 											if (opcode == Opcodes.RETURN) {
 												Containers.logger.info("Injecting...");
 												this.visitVarInsn(Opcodes.ALOAD, 0);
-												this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", DefineTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
+												this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
 												this.visitVarInsn(Opcodes.ALOAD, 0);
-												this.visitFieldInsn(Opcodes.GETFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
+												this.visitFieldInsn(Opcodes.GETFIELD, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
 												this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-												this.visitFieldInsn(Opcodes.PUTFIELD, DefineTransformer.this.className, DefineTransformer.this.fieldName, DefineTransformer.this.type.getTypeFullClassName());
+												this.visitFieldInsn(Opcodes.PUTFIELD, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
 												Containers.logger.info("Injected.");
 											}
 											super.visitInsn(opcode);
@@ -134,19 +146,19 @@ public class CMESuckMyDuck {
 						public FieldVisitor visitField(int access, String name, String descriptor, @Nullable String signature, @Nullable Object value) {
 							Containers.logger.debug("Visit field " + name + ".");
 
-							if(name.equals(DefineTransformer.this.fieldName)) {
+							if(name.equals(WrapContainerTransformer.this.fieldName)) {
 								boolean isStatic = ((access & Opcodes.ACC_STATIC) != 0);
-								if(DefineTransformer.this.phase.isStatic() != isStatic) {
+								if(WrapContainerTransformer.this.phase.isStatic() != isStatic) {
 									Containers.logger.fatal(
 											"Failed to verify phase. Expected: %s. Found: %s.",
-											DefineTransformer.this.phase.getPhaseName(),
+											WrapContainerTransformer.this.phase.getPhaseName(),
 											isStatic ? "static" : "nonstatic"
 									);
 								} else {
-									if(!descriptor.equals(DefineTransformer.this.type.getTypeFullClassName())) {
+									if(!descriptor.equals(WrapContainerTransformer.this.type.getTypeFullClassName())) {
 										Containers.logger.fatal(
 												"Failed to verify type. Expected: %s. Found: %s.",
-												DefineTransformer.this.type.getTypeFullClassName(),
+												WrapContainerTransformer.this.type.getTypeFullClassName(),
 												descriptor
 										);
 									}
@@ -154,6 +166,56 @@ public class CMESuckMyDuck {
 							}
 
 							return super.visitField(access, name, descriptor, signature, value);
+						}
+					}, 0);
+					return writer.toByteArray();
+				} catch(Exception e) {
+					Containers.logger.error(e);
+				}
+			}
+			return classFileBuffer;
+		}
+	}
+
+	static class InjectLogTransformer implements ClassFileTransformer {
+		final String className;
+		final String methodName;
+
+		public InjectLogTransformer(String className, String methodName) {
+			this.className = className;
+			this.methodName = methodName;
+		}
+
+		@Override
+		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
+			if (className.equals(this.className)) {
+				try {
+					Containers.logger.info("Found class " + this.className + ".");
+					ClassReader reader = new ClassReader(classFileBuffer);
+					ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+					reader.accept(new ClassVisitor(ASM_API_VERSION, writer) {
+						@Override
+						public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+							Containers.logger.debug("Visit method " + name + ".");
+							MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+							if(name.equals(InjectLogTransformer.this.methodName)) {
+								Containers.logger.info("Found injection point in method %s.", InjectLogTransformer.this.methodName);
+								return new MethodVisitor(ASM_API_VERSION, mv) {
+									@Override
+									public void visitCode() {
+										super.visitCode();
+										Containers.logger.info("Injecting...");
+										this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/containers/Containers", "logger", "Lcom/hexagram2021/cme_suck_my_duck/utils/Log;");
+										this.visitTypeInsn(Opcodes.NEW, "com/hexagram2021/cme_suck_my_duck/utils/SuckTraceException");
+										this.visitInsn(Opcodes.DUP);
+										this.visitLdcInsn("Trace");
+										this.visitMethodInsn(Opcodes.INVOKESPECIAL, "com/hexagram2021/cme_suck_my_duck/utils/SuckTraceException", "<init>", "(Ljava/lang/String;)V", false);
+										this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/utils/Log", "info", "(Ljava/lang/Throwable;)V", false);
+										Containers.logger.info("Injected.");
+									}
+								};
+							}
+							return mv;
 						}
 					}, 0);
 					return writer.toByteArray();
@@ -207,5 +269,11 @@ public class CMESuckMyDuck {
 		} catch (Exception ignored) {
 		}
 		ASM_API_VERSION = asmApiVersion;
+		boolean injectMethod = false;
+		try {
+			injectMethod = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.inject_method"));
+		} catch (Exception ignored) {
+		}
+		INJECT_METHOD = injectMethod;
 	}
 }
