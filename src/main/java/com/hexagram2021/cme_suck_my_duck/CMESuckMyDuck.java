@@ -53,24 +53,23 @@ public class CMESuckMyDuck {
 			logger.error(e);
 		}
 
+		String[] args = agentArg.split(";");
 		if(INJECT_METHOD) {
-			String[] args = agentArg.split(";");
 			if (args.length < 2) {
 				logger.error("Failed to parse agent arguments. Expect 2 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
 				return;
 			}
 			inst.addTransformer(new InjectLogTransformer(args[0], args[1]), true);
-			logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+			logger.info("Successfully added transformer for method %s of class %s.", args[1], args[0]);
 		} else {
 			//Parse
-			String[] args = agentArg.split(";");
 			if (args.length < 4) {
 				logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
 				return;
 			}
 			//Main
 			inst.addTransformer(new WrapContainerTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
-			logger.info("Successfully added transformer for %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+			logger.info("Successfully added transformer for field %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 		}
 	}
 

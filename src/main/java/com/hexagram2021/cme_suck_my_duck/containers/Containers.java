@@ -15,12 +15,12 @@ import static com.hexagram2021.cme_suck_my_duck.utils.SharedConstants.LOG_PATH;
 @SuppressWarnings("unchecked")
 public final class Containers {
 	public static final Log logger;
-	private static final boolean fix;
+	private static final boolean transformToThreadSafe;
 	
 	public static <T> List<T> newWrappedList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(fix) {
+				if(transformToThreadSafe) {
 					return new CopyOnWriteArrayList<>((List<T>) wrapped);
 				}
 				return new WrappedList<>((List<T>) wrapped);
@@ -34,7 +34,7 @@ public final class Containers {
 	public static <T> Set<T> newWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(fix) {
+				if(transformToThreadSafe) {
 					Set<T> ret = ConcurrentHashMap.newKeySet();
 					ret.addAll((Set<T>) wrapped);
 					return ret;
@@ -50,7 +50,7 @@ public final class Containers {
 	public static <K, V> Map<K, V> newWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(fix) {
+				if(transformToThreadSafe) {
 					return new ConcurrentHashMap<>((Map<K, V>) wrapped);
 				}
 				return new WrappedMap<>((Map<K, V>) wrapped);
@@ -73,9 +73,9 @@ public final class Containers {
 		}
 		boolean fixConcurrent = false;
 		try {
-			fixConcurrent = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.fix"));
+			fixConcurrent = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.transform_to_thread_safe"));
 		} catch (Exception ignored) {
 		}
-		fix = fixConcurrent;
+		transformToThreadSafe = fixConcurrent;
 	}
 }
