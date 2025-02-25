@@ -169,7 +169,7 @@ public final class Log {
 		} catch (Exception ignored) {
 		}
 		LOG_LEVEL = level;
-		long logWaitTime = 1000L;
+		long logWaitTime = 500L;
 		try {
 			logWaitTime = Long.parseLong(System.getProperty("cme_suck_my_duck.log_wait_time"));
 		} catch (Exception ignored) {

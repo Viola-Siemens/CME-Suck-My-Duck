@@ -31,8 +31,8 @@ public class CMESuckMyDuck {
 		System.out.println("Usage:");
 		System.out.println("\t-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<field name>;<type>;<phase>");
 		System.out.println("For example:");
-		System.out.println("\t-javaagent:CMESuckMyDuck-" + SharedConstants.VERSION + ".jar=org/violetmoon/zetaimplforge/event/ForgeZetaEventBus;convertedHandlers;Map;nonstatic");
-		System.out.println("Which means, each modification of map `convertedHandlers`, which is a nonstatic member in `ForgeZetaEventBus`, will be traced - when add and remove is called, a stacktrace will be printed to the log.");
+		System.out.println("\t-javaagent:mods/CMESuckMyDuck-" + SharedConstants.VERSION + ".jar=net/minecraft/server/packs/resources/ReloadableResourceManager;f_203816_;List;nonstatic");
+		System.out.println("Which means, each modification of list `f_203816_`, which is a nonstatic member in `ReloadableResourceManager`, will be traced - when add and remove is called, a stacktrace will be printed to the log.");
 		System.out.println("All valid types:");
 		for(Type type: Type.values()) {
 			System.out.printf(" -\t%s\n", type.getTypeName());
@@ -41,6 +41,22 @@ public class CMESuckMyDuck {
 		for(Phase phase: Phase.values()) {
 			System.out.printf(" -\t%s\n", phase.getPhaseName());
 		}
+		System.out.println();
+		System.out.println("Other JVM args:");
+		System.out.println(" -Dcme_suck_my_duck.log_level=<level>");
+		System.out.println("\tDefault <level>=1, which means no debug message will be logged. If <level> is 0, query functions like Map#get, Set#containsAll will also be logged. This is NOT recommended because it may make the log files too long to be read.");
+		System.out.println(" -Dcme_suck_my_duck.asm_api_version=<version>");
+		System.out.println("\tDefault <version>=9, which means we use ASM API of version 9.x. For older versions of Minecraft (such as 1.12.2), API level operations such as ASM_9 cannot be applied, so you can set it to a lower value (suck as 5).");
+		System.out.println(" -Dcme_suck_my_duck.file_max_entries=<size>");
+		System.out.println("\tDefault <size>=1000, which means after every 1000 stack traces, old log file will be deleted, and new log file with 1000 stack traces will be renamed, and a newer log file with the latest stack trace will be create - when system crashes, the latest 1001 ~ 2000 stack traces will be accessible in two log files.");
+		System.out.println(" -Dcme_suck_my_duck.log_wait_time=<milliseconds>");
+		System.out.println("\tDefault <milliseconds>=500, which means log file I/O will be triggered every half second. All cached stack traces will be logged after log file I/O.");
+		System.out.println(" -Dcme_suck_my_duck.whitelist_constructor_stacktrace=<str>");
+		System.out.println("\tDefault empty string, which means all containers will be monitored if class name matches and field name matches. If not empty, the container will only be monitored if any line in the stack trace where the container is constructed includes the content of <str>.");
+		System.out.println(" -Dcme_suck_my_duck.transform_to_thread_safe=<bool>");
+		System.out.println("\tDefault <bool>=false. If true, no stack traces will be logged and the container will be converted into a thread-safe container. This is NOT recommended unless you like slowness and don't want to fix the problem.");
+		System.out.println(" -Dcme_suck_my_duck.inject_method=<bool>");
+		System.out.println("\tDefault <bool>=false. If true, you should use `-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<method name>` and whenever this method is called, you will receive a stack trace in log files.");
 	}
 
 	public static void premain(String agentArg, Instrumentation inst) {
@@ -59,6 +75,8 @@ public class CMESuckMyDuck {
 				logger.error("Failed to parse agent arguments. Expect 2 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
 				return;
 			}
+			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
+			args[0] = args[0].replace(".", "/");
 			inst.addTransformer(new InjectLogTransformer(args[0], args[1]), true);
 			logger.info("Successfully added transformer for method %s of class %s.", args[1], args[0]);
 		} else {
@@ -67,6 +85,8 @@ public class CMESuckMyDuck {
 				logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
 				return;
 			}
+			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
+			args[0] = args[0].replace(".", "/");
 			//Main
 			inst.addTransformer(new WrapContainerTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
 			logger.info("Successfully added transformer for field %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);

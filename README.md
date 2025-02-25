@@ -56,6 +56,43 @@ Use system property `-Dcme_suck_my_duck.log_level=<level>` to set custom log lev
 
 Default 1, which means no debug message will be logged. Users can set it to 0 to output debug message.
 
+### ASM API Version
+
+Use system property `-Dcme_suck_my_duck.asm_api_version=<version>` to set ASM API version.
+
+Default 9, which means we use ASM API of version 9.x. For older versions of Minecraft (such as 1.12.2), API level operations such as ASM_9 cannot be applied, so you can set it to a lower value (suck as 5).
+
+### File Max Entries
+
+Use system property `-Dcme_suck_my_duck.file_max_entries=<size>` to set max count of stack traces in each log files.
+
+Default 1000, which means after every 1000 stack traces, old log file will be deleted, and new log file with 1000 stack traces will be renamed, and a newer log file with the latest stack trace will be create - when system crashes, the latest 1001 ~ 2000 stack traces will be accessible in two log files.
+
+### Log Wait Time
+
+Use system property `-Dcme_suck_my_duck.log_wait_time=<milliseconds>` to set wait time of log thread.
+
+Default 500, which means log file I/O will be triggered every half second. All cached stack traces will be logged after log file I/O.
+
+
+### Whitelist Constructor Stacktrace
+
+Use system property `-Dcme_suck_my_duck.whitelist_constructor_stacktrace=<str>` to set whitelist.
+
+Default empty string, which means all containers will be monitored if class name matches and field name matches. If not empty, the container will only be monitored if any line in the stack trace where the container is constructed includes the content of <str>.
+
+### Transform to Thread Safe
+
+Use system property `-Dcme_suck_my_duck.transform_to_thread_safe=true` to transform the field into a thread-safe container.
+
+This is NOT recommended unless you like slowness and don't want to fix the problem.
+
+### Inject method
+
+Use system property `-Dcme_suck_my_duck.inject_method=true` to switch to inject mode.
+
+If set, you should use `-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<method name>` and whenever this method is called, you will receive a stack trace in log files.
+
 ## Experiments
 
 Code (simulates concurrent modification):
