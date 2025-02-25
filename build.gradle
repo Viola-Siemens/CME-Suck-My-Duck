@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.hexagram2021.cme_suck_my_duck'
-version = '1.0.4'
+version = '1.0.5'
 
 compileJava {
     sourceCompatibility = 8
@@ -47,6 +47,7 @@ dependencies {
     compileOnly 'net.fabricmc:fabric-loader:0.15.11'
     //compileOnly 'net.minecraftforge:javafmllanguage:1.12.2-14.23.5.2859'
     compileOnly 'net.neoforged.fancymodloader:loader:2.0.20'
+    compileOnly 'it.unimi.dsi:fastutil:8.5.12'
 
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'

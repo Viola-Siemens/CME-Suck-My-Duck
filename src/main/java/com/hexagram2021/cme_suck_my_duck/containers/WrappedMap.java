@@ -139,7 +139,7 @@ public class WrappedMap<K, V> implements Map<K, V> {
 
 	@Override @Nullable
 	public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-		logger.info(new SuckTraceException("[Modify] computeIfAbsent(Object, BiFunction)"));
+		logger.info(new SuckTraceException("[Modify] computeIfPresent(Object, BiFunction)"));
 		return this.wrapped.computeIfPresent(key, remappingFunction);
 	}
 

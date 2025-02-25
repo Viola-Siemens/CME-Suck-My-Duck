@@ -1,15 +1,18 @@
 package com.hexagram2021.cme_suck_my_duck;
 
 import com.hexagram2021.cme_suck_my_duck.containers.Containers;
+import com.hexagram2021.cme_suck_my_duck.containers.FastContainers;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@SuppressWarnings("Convert2MethodRef")
 public enum Type {
 	LIST("List", "Ljava/util/List;", Containers::newWrappedList),
 	SET("Set", "Ljava/util/Set;", Containers::newWrappedSet),
-	MAP("Map", "Ljava/util/Map;", Containers::newWrappedMap);
+	MAP("Map", "Ljava/util/Map;", Containers::newWrappedMap),
+	INT_2_OBJECT_MAP("Int2ObjectMap", "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;", (object) -> FastContainers.newInt2ObjectWrappedMap(object));
 
 	private static final Map<String, Type> BY_NAME;
 	private final String typeName;
