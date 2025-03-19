@@ -28,7 +28,7 @@ For NeoForge, use official name.
 
 ### \<type\>
 
-Currently, we only support three containers: `List`, `Set`, `Map`. This argument indicates the type of monitored container.
+Currently, we only support four containers: `List`, `Set`, `Map`, and `Int2ObjectMap` if library "it.unimi.dsi.fastutil" is installed. This argument indicates the type of monitored container.
 
 ### \<phase\>
 
@@ -92,6 +92,10 @@ This is NOT recommended unless you like slowness and don't want to fix the probl
 Use system property `-Dcme_suck_my_duck.inject_method=true` to switch to inject mode.
 
 If set, you should use `-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<method name>` and whenever this method is called, you will receive a stack trace in log files.
+
+### Ignore threads
+
+Use system property `-Dcme_suck_my_duck.ignore_threads=<thread name1>;<thread name2>;<thread name3>;...` to ignore some thread that is expected to modify the given container (or call the given method). For example, `-Dcme_suck_my_duck.ignore_threads="Server thread"`.
 
 ## Experiments
 

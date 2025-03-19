@@ -22,6 +22,7 @@ public final class Log {
 	private static final int FILE_MAX_ENTRIES;
 	@Nullable
 	private static final String WHITELIST_CONSTRUCTOR_STACKTRACE;
+	private static final String[] IGNORE_THREADS;
 	private static final Thread LOG_THREAD;
 	private static final Thread MAIN_THREAD;
 
@@ -73,7 +74,7 @@ public final class Log {
 		}
 	}
 	private void log(Level level, Throwable t) {
-		if(level.level() >= LOG_LEVEL) {
+		if(level.level() >= LOG_LEVEL && !shouldIgnoreThread()) {
 			this.TO_LOGS.add(new ThrowableLogEntry(level.name(), t));
 		}
 	}
@@ -182,6 +183,12 @@ public final class Log {
 		}
 		FILE_MAX_ENTRIES = fileMaxEntries;
 		WHITELIST_CONSTRUCTOR_STACKTRACE = System.getProperty("cme_suck_my_duck.whitelist_constructor_stacktrace");
+		String ignoreThreads = System.getProperty("cme_suck_my_duck.ignore_threads");
+		if(ignoreThreads == null) {
+			IGNORE_THREADS = new String[0];
+		} else {
+			IGNORE_THREADS = ignoreThreads.split(";");
+		}
 		LOG_THREAD = new Thread(Log::logThread, "CMESuckMyDuck-Log");
 		LOG_THREAD.setDaemon(true);
 		LOG_THREAD.start();
@@ -195,6 +202,17 @@ public final class Log {
 		StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 		for (StackTraceElement element: stackTrace) {
 			if(element.toString().contains(WHITELIST_CONSTRUCTOR_STACKTRACE)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@SuppressWarnings("BooleanMethodIsAlwaysInverted")
+	public static boolean shouldIgnoreThread() {
+		String threadName = Thread.currentThread().getName();
+		for(String ignoreThread: IGNORE_THREADS) {
+			if(threadName.equals(ignoreThread)) {
 				return true;
 			}
 		}
