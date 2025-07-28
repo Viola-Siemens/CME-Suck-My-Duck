@@ -12,7 +12,8 @@ public enum Type {
 	LIST("List", "Ljava/util/List;", Containers::newWrappedList),
 	SET("Set", "Ljava/util/Set;", Containers::newWrappedSet),
 	MAP("Map", "Ljava/util/Map;", Containers::newWrappedMap),
-	INT_2_OBJECT_MAP("Int2ObjectMap", "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;", (object) -> FastContainers.newInt2ObjectWrappedMap(object));
+	INT_2_OBJECT_MAP("Int2ObjectMap", "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;", (object) -> FastContainers.newInt2ObjectWrappedMap(object)),
+	OBJECT_2_INT_MAP("Object2IntMap", "Lit/unimi/dsi/fastutil/objects/Object2IntMap;", (object) -> FastContainers.newObject2IntWrappedMap(object));
 
 	private static final Map<String, Type> BY_NAME;
 	private final String typeName;

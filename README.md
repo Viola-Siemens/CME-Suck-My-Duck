@@ -28,7 +28,7 @@ For NeoForge, use official name.
 
 ### \<type\>
 
-Currently, we only support four containers: `List`, `Set`, `Map`, and `Int2ObjectMap` if library "it.unimi.dsi.fastutil" is installed. This argument indicates the type of monitored container.
+Currently, we only support four containers: `List`, `Set`, `Map`, and `Int2ObjectMap`, `Object2IntMap` if library "it.unimi.dsi.fastutil" is installed. This argument indicates the type of monitored container.
 
 ### \<phase\>
 
