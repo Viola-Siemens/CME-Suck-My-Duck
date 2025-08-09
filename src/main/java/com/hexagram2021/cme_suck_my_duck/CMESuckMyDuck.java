@@ -224,12 +224,8 @@ public class CMESuckMyDuck {
 									public void visitCode() {
 										super.visitCode();
 										Containers.logger.info("Injecting...");
-										this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/containers/Containers", "logger", "Lcom/hexagram2021/cme_suck_my_duck/utils/Log;");
-										this.visitTypeInsn(Opcodes.NEW, "com/hexagram2021/cme_suck_my_duck/utils/SuckTraceException");
-										this.visitInsn(Opcodes.DUP);
 										this.visitLdcInsn("Trace");
-										this.visitMethodInsn(Opcodes.INVOKESPECIAL, "com/hexagram2021/cme_suck_my_duck/utils/SuckTraceException", "<init>", "(Ljava/lang/String;)V", false);
-										this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/utils/Log", "info", "(Ljava/lang/Throwable;)V", false);
+										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceLogger", "info", "(Ljava/lang/String;)V", false);
 										Containers.logger.info("Injected.");
 									}
 								};

@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public final class Log {
 	@Nullable
 	public static Log INSTANCE = null;
-	private static final int LOG_LEVEL;
+	static final int LOG_LEVEL;
 	private static final long LOG_WAIT_TIME;
 	private static final int FILE_MAX_ENTRIES;
 	@Nullable
@@ -73,8 +73,8 @@ public final class Log {
 			this.TO_LOGS.add(new StringLogEntry(level.name(), message));
 		}
 	}
-	private void log(Level level, Throwable t) {
-		if(level.level() >= LOG_LEVEL && !shouldIgnoreThread()) {
+	void log(Level level, Throwable t) {
+		if(level.level() >= LOG_LEVEL) {
 			this.TO_LOGS.add(new ThrowableLogEntry(level.name(), t));
 		}
 	}

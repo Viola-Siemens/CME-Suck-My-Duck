@@ -1,11 +1,11 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
-import com.hexagram2021.cme_suck_my_duck.utils.SuckTraceException;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedListIterator;
+import com.hexagram2021.cme_suck_my_duck.utils.TraceLogger;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
-
-import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
 
 public class WrappedList<T> implements List<T> {
 	final List<T> wrapped;
@@ -30,14 +30,14 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public boolean contains(Object o) {
-		logger.debug(new SuckTraceException("[Query] contains(Object)"));
+		TraceLogger.debug("[Query] contains(Object)");
 		return this.wrapped.contains(o);
 	}
 
 	@Override
 	public Iterator<T> iterator() {
-		logger.info(new SuckTraceException("[Iteration] iterator()"));
-		return this.wrapped.iterator();
+		TraceLogger.info("[Iteration] iterator()");
+		return new WrappedIterator<>(this.wrapped.iterator());
 	}
 
 	@Override
@@ -52,111 +52,111 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public boolean add(T t) {
-		logger.info(new SuckTraceException("[Modify] add(Object)"));
+		TraceLogger.info("[Modify] add(Object)");
 		return this.wrapped.add(t);
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		logger.info(new SuckTraceException("[Modify] remove(Object)"));
+		TraceLogger.info("[Modify] remove(Object)");
 		return this.wrapped.remove(o);
 	}
 
 	@SuppressWarnings("SlowListContainsAll")
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		logger.debug(new SuckTraceException("[Query] containsAll(Collection)"));
+		TraceLogger.debug("[Query] containsAll(Collection)");
 		return this.wrapped.containsAll(c);
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
-		logger.info(new SuckTraceException("[Modify] addAll(Collection)"));
+		TraceLogger.info("[Modify] addAll(Collection)");
 		return this.wrapped.addAll(c);
 	}
 
 	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
-		logger.info(new SuckTraceException("[Modify] addAll(int, Collection)"));
+		TraceLogger.info("[Modify] addAll(int, Collection)");
 		return this.wrapped.addAll(index, c);
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		logger.info(new SuckTraceException("[Modify] removeAll(Collection)"));
+		TraceLogger.info("[Modify] removeAll(Collection)");
 		return this.wrapped.removeAll(c);
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		logger.info(new SuckTraceException("[Modify] retainAll(Collection)"));
+		TraceLogger.info("[Modify] retainAll(Collection)");
 		return this.wrapped.retainAll(c);
 	}
 
 	@Override
 	public void replaceAll(UnaryOperator<T> operator) {
-		logger.info(new SuckTraceException("[Modify] replaceAll(UnaryOperator)"));
+		TraceLogger.info("[Modify] replaceAll(UnaryOperator)");
 		this.wrapped.replaceAll(operator);
 	}
 
 	@Override
 	public void sort(Comparator<? super T> c) {
-		logger.info(new SuckTraceException("[Modify] sort(Comparator)"));
+		TraceLogger.info("[Modify] sort(Comparator)");
 		this.wrapped.sort(c);
 	}
 
 	@Override
 	public void clear() {
-		logger.info(new SuckTraceException("[Modify] clear()"));
+		TraceLogger.info("[Modify] clear()");
 		this.wrapped.clear();
 	}
 
 	@Override
 	public T get(int index) {
-		logger.debug(new SuckTraceException("[Query] get(int)"));
+		TraceLogger.debug("[Query] get(int)");
 		return this.wrapped.get(index);
 	}
 
 	@Override
 	public T set(int index, T element) {
-		logger.info(new SuckTraceException("[Modify] set(int, Object)"));
+		TraceLogger.info("[Modify] set(int, Object)");
 		return this.wrapped.set(index, element);
 	}
 
 	@Override
 	public void add(int index, T element) {
-		logger.info(new SuckTraceException("[Modify] add(int, Object)"));
+		TraceLogger.info("[Modify] add(int, Object)");
 		this.wrapped.add(index, element);
 	}
 
 	@Override
 	public T remove(int index) {
-		logger.info(new SuckTraceException("[Modify] remove(int)"));
+		TraceLogger.info("[Modify] remove(int)");
 		return this.wrapped.remove(index);
 	}
 
 	@Override
 	public int indexOf(Object o) {
-		logger.debug(new SuckTraceException("[Query] indexOf(Object)"));
+		TraceLogger.debug("[Query] indexOf(Object)");
 		return this.wrapped.indexOf(o);
 	}
 
 	@Override
 	public int lastIndexOf(Object o) {
-		logger.debug(new SuckTraceException("[Query] lastIndexOf(Object)"));
+		TraceLogger.debug("[Query] lastIndexOf(Object)");
 		return this.wrapped.lastIndexOf(o);
 	}
 
 	@Override
 	public ListIterator<T> listIterator() {
-		logger.info(new SuckTraceException("[Iteration] listIterator()"));
-		return this.wrapped.listIterator();
+		TraceLogger.info("[Iteration] listIterator()");
+		return new WrappedListIterator<>(this.wrapped.listIterator());
 	}
 
 	@Override
 	public ListIterator<T> listIterator(int index) {
-		logger.info(new SuckTraceException("[Iteration] listIterator(int)"));
-		return this.wrapped.listIterator(index);
+		TraceLogger.info("[Iteration] listIterator(int)");
+		return new WrappedListIterator<>(this.wrapped.listIterator(index));
 	}
 
 	@Override
