@@ -1,6 +1,6 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
-import com.hexagram2021.cme_suck_my_duck.utils.TraceLogger;
+import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.objects.Object2IntFunction;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -11,15 +11,9 @@ import java.util.Map;
 import java.util.function.*;
 
 @SuppressWarnings("deprecation")
-public class Object2IntWrappedMap<K> implements Object2IntMap<K> {
-	final Object2IntMap<K> wrapped;
-
-	public Object2IntWrappedMap(Object2IntMap<K> wrapped) {
-		if(wrapped instanceof Object2IntWrappedMap) {
-			this.wrapped = ((Object2IntWrappedMap<K>)wrapped).wrapped;
-		} else {
-			this.wrapped = wrapped;
-		}
+public class Object2IntWrappedMap<K> extends AbstractWrappedContainer<Object2IntMap<K>> implements Object2IntMap<K> {
+	Object2IntWrappedMap(Object2IntMap<K> wrapped) {
+		super(wrapped);
 	}
 
 	@Override
@@ -34,61 +28,89 @@ public class Object2IntWrappedMap<K> implements Object2IntMap<K> {
 
 	@Override
 	public boolean containsKey(Object key) {
-		TraceLogger.debug("[Query] containsKey(Object)");
-		return this.wrapped.containsKey(key);
+		this.logQuery("containsKey(Object)");
+		try {
+			return this.wrapped.containsKey(key);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean containsValue(int value) {
-		TraceLogger.debug("[Query] containsValue(int)");
-		return this.wrapped.containsValue(value);
+		this.logQuery("containsValue(int)");
+		try {
+			return this.wrapped.containsValue(value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Integer get(Object key) {
-		TraceLogger.debug("[Query] get(Object)");
+		this.logQuery("get(Object)");
 		return this.wrapped.get(key);
 	}
 
 	@Override
 	public int put(K key, int value) {
-		TraceLogger.info("[Modify] put(Object, int)");
-		return this.wrapped.put(key, value);
+		this.logModify("put(Object, int)");
+		try {
+			return this.wrapped.put(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int getInt(Object key) {
-		TraceLogger.debug("[Query] getInt(Object)");
+		this.logQuery("getInt(Object)");
 		return this.wrapped.getInt(key);
 	}
 
 	@Override
 	public Integer remove(Object key) {
-		TraceLogger.info("[Modify] remove(Object)");
-		return this.wrapped.remove(key);
+		this.logModify("remove(Object)");
+		try {
+			return this.wrapped.remove(key);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int removeInt(Object key) {
-		TraceLogger.info("[Modify] removeInt(Object)");
-		return this.wrapped.removeInt(key);
+		this.logModify("removeInt(Object)");
+		try {
+			return this.wrapped.removeInt(key);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void putAll(Map<? extends K, ? extends Integer> m) {
-		TraceLogger.info("[Modify] putAll(Map)");
-		this.wrapped.putAll(m);
+		this.logModify("putAll(Map)");
+		try {
+			this.wrapped.putAll(m);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void clear() {
-		TraceLogger.info("[Modify] clear()");
-		this.wrapped.clear();
+		this.logModify("clear()");
+		try {
+			this.wrapped.clear();
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void defaultReturnValue(int rv) {
-		TraceLogger.info("[Modify] defaultReturnValue(int)");
+		this.logModify("defaultReturnValue(int)");
 		this.wrapped.defaultReturnValue(rv);
 	}
 
@@ -99,139 +121,215 @@ public class Object2IntWrappedMap<K> implements Object2IntMap<K> {
 
 	@Override
 	public ObjectSet<K> keySet() {
-		TraceLogger.debug("[Query] keySet()");
-		return this.wrapped.keySet();
+		this.logQuery("keySet()");
+		return new ObjectWrappedSet<>(this.wrapped.keySet(), this.traceId);
 	}
 
 	@Override
 	public IntCollection values() {
-		TraceLogger.debug("[Query] values()");
+		this.logQuery("values()");
 		return this.wrapped.values();
 	}
 
 	@Override
 	public ObjectSet<Entry<K>> object2IntEntrySet() {
-		TraceLogger.debug("[Query] entrySet()");
-		return this.wrapped.object2IntEntrySet();
+		this.logQuery("entrySet()");
+		return new ObjectWrappedSet<>(this.wrapped.object2IntEntrySet(), this.traceId);
 	}
 
 	@Override
 	public int getOrDefault(Object key, int defaultValue) {
-		TraceLogger.debug("[Query] getOrDefault(Object, int)");
+		this.logQuery("getOrDefault(Object, int)");
 		return this.wrapped.getOrDefault(key, defaultValue);
 	}
 
 	@Override
 	public void forEach(BiConsumer<? super K, ? super Integer> action) {
-		TraceLogger.debug("[Query] forEach(BiConsumer)");
-		this.wrapped.forEach(action);
+		this.logQuery("forEach(BiConsumer)");
+		try {
+			this.wrapped.forEach(action);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void replaceAll(BiFunction<? super K, ? super Integer, ? extends Integer> function) {
-		TraceLogger.info("[Modify] replaceAll(BiFunction)");
-		this.wrapped.replaceAll(function);
+		this.logModify("replaceAll(BiFunction)");
+		try {
+			this.wrapped.replaceAll(function);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int putIfAbsent(K key, int value) {
-		TraceLogger.info("[Modify] putIfAbsent(Object, int)");
-		return this.wrapped.putIfAbsent(key, value);
+		this.logModify("putIfAbsent(Object, int)");
+		try {
+			return this.wrapped.putIfAbsent(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Integer putIfAbsent(K key, Integer value) {
-		TraceLogger.info("[Modify] putIfAbsent(Object, Integer)");
-		return this.wrapped.putIfAbsent(key, value);
+		this.logModify("putIfAbsent(Object, Integer)");
+		try {
+			return this.wrapped.putIfAbsent(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean remove(Object key, int value) {
-		TraceLogger.info("[Modify] remove(Object, int)");
-		return this.wrapped.remove(key, value);
+		this.logModify("remove(Object, int)");
+		try {
+			return this.wrapped.remove(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean remove(Object key, Object value) {
-		TraceLogger.info("[Modify] remove(Object, Object)");
-		return this.wrapped.remove(key, value);
+		this.logModify("remove(Object, Object)");
+		try {
+			return this.wrapped.remove(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean replace(K key, int oldValue, int newValue) {
-		TraceLogger.info("[Modify] replace(Object, int, int)");
-		return this.wrapped.replace(key, oldValue, newValue);
+		this.logModify("replace(Object, int, int)");
+		try {
+			return this.wrapped.replace(key, oldValue, newValue);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int replace(K key, int value) {
-		TraceLogger.info("[Modify] replace(Object, int)");
-		return this.wrapped.replace(key, value);
+		this.logModify("replace(Object, int)");
+		try {
+			return this.wrapped.replace(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean replace(K key, Integer oldValue, Integer newValue) {
-		TraceLogger.info("[Modify] replace(Object, Integer, Integer)");
-		return this.wrapped.replace(key, oldValue, newValue);
+		this.logModify("replace(Object, Integer, Integer)");
+		try {
+			return this.wrapped.replace(key, oldValue, newValue);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Integer replace(K key, Integer value) {
-		TraceLogger.info("[Modify] replace(Object, Integer)");
-		return this.wrapped.replace(key, value);
+		this.logModify("replace(Object, Integer)");
+		try {
+			return this.wrapped.replace(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int computeIfAbsent(K key, ToIntFunction<? super K> mappingFunction) {
-		TraceLogger.info("[Modify] computeIfAbsent(Object, ToIntFunction)");
-		return this.wrapped.computeIfAbsent(key, mappingFunction);
+		this.logModify("computeIfAbsent(Object, ToIntFunction)");
+		try {
+			return this.wrapped.computeIfAbsent(key, mappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int computeIfAbsent(K key, Object2IntFunction<? super K> mappingFunction) {
-		TraceLogger.info("[Modify] computeIfAbsent(Object, Object2IntFunction)");
-		return this.wrapped.computeIfAbsent(key, mappingFunction);
+		this.logModify("computeIfAbsent(Object, Object2IntFunction)");
+		try {
+			return this.wrapped.computeIfAbsent(key, mappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Integer computeIfAbsent(K key, Function<? super K, ? extends Integer> mappingFunction) {
-		TraceLogger.info("[Modify] computeIfAbsent(Object, Function)");
-		return this.wrapped.computeIfAbsent(key, mappingFunction);
+		this.logModify("computeIfAbsent(Object, Function)");
+		try {
+			return this.wrapped.computeIfAbsent(key, mappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override @Nullable
 	public Integer computeIfPresent(K key, BiFunction<? super K, ? super Integer, ? extends Integer> remappingFunction) {
-		TraceLogger.info("[Modify] computeIfPresent(Object, BiFunction)");
-		return this.wrapped.computeIfPresent(key, remappingFunction);
+		this.logModify("computeIfPresent(Object, BiFunction)");
+		try {
+			return this.wrapped.computeIfPresent(key, remappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int computeIntIfPresent(K key, BiFunction<? super K, ? super Integer, ? extends Integer> remappingFunction) {
-		TraceLogger.info("[Modify] computeIntIfPresent(Object, BiFunction)");
-		return this.wrapped.computeIntIfPresent(key, remappingFunction);
+		this.logModify("computeIntIfPresent(Object, BiFunction)");
+		try {
+			return this.wrapped.computeIntIfPresent(key, remappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Integer compute(K key, BiFunction<? super K, ? super Integer, ? extends Integer> remappingFunction) {
-		TraceLogger.info("[Modify] compute(Object, BiFunction)");
-		return this.wrapped.compute(key, remappingFunction);
+		this.logModify("compute(Object, BiFunction)");
+		try {
+			return this.wrapped.compute(key, remappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int computeInt(K key, BiFunction<? super K, ? super Integer, ? extends Integer> remappingFunction) {
-		TraceLogger.info("[Modify] computeInt(Object, BiFunction)");
-		return this.wrapped.computeInt(key, remappingFunction);
+		this.logModify("computeInt(Object, BiFunction)");
+		try {
+			return this.wrapped.computeInt(key, remappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int merge(K key, int value, BiFunction<? super Integer, ? super Integer, ? extends Integer> remappingFunction) {
-		TraceLogger.info("[Modify] merge(Object, int, BiFunction)");
-		return this.wrapped.merge(key, value, remappingFunction);
+		this.logModify("merge(Object, int, BiFunction)");
+		try {
+			return this.wrapped.merge(key, value, remappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int mergeInt(K key, int value, IntBinaryOperator remappingFunction) {
-		TraceLogger.info("[Modify] mergeInt(Object, int, IntBinaryOperator)");
-		return this.wrapped.mergeInt(key, value, remappingFunction);
+		this.logModify("mergeInt(Object, int, IntBinaryOperator)");
+		try {
+			return this.wrapped.mergeInt(key, value, remappingFunction);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 }

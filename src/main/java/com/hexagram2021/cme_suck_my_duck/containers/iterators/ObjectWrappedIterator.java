@@ -2,14 +2,13 @@ package com.hexagram2021.cme_suck_my_duck.containers.iterators;
 
 import com.hexagram2021.cme_suck_my_duck.containers.AbstractWrappedContainer;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
 
-import java.util.Iterator;
-
-public class WrappedIterator<T> extends AbstractWrappedContainer<Iterator<T>> implements Iterator<T> {
-	public WrappedIterator(Iterator<T> wrapped) {
+public class ObjectWrappedIterator<T> extends AbstractWrappedContainer<ObjectIterator<T>> implements ObjectIterator<T> {
+	public ObjectWrappedIterator(ObjectIterator<T> wrapped) {
 		super(wrapped);
 	}
-	public WrappedIterator(Iterator<T> wrapped, String traceId) {
+	public ObjectWrappedIterator(ObjectIterator<T> wrapped, String traceId) {
 		super(wrapped, traceId);
 	}
 

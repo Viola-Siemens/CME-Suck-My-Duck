@@ -224,6 +224,7 @@ public class CMESuckMyDuck {
 									public void visitCode() {
 										super.visitCode();
 										Containers.logger.info("Injecting...");
+										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceIdGenerator", "getGlobalTraceId", "()Ljava/lang/String;", false);
 										this.visitLdcInsn("Trace");
 										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceLogger", "info", "(Ljava/lang/String;)V", false);
 										Containers.logger.info("Injected.");

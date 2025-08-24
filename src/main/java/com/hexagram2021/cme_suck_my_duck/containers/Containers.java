@@ -1,12 +1,10 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.*;
 import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
 import java.nio.file.StandardOpenOption;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -60,6 +58,28 @@ public final class Containers {
 			logger.fatal(e);
 		}
 		return Collections.emptyMap();
+	}
+	public static <T> Iterator<T> newIterator(Object wrapped) {
+		try {
+			if(Log.canWrap()) {
+				return new WrappedIterator<>((Iterator<T>) wrapped);
+			}
+			return (Iterator<T>) wrapped;
+		} catch (ClassCastException e) {
+			logger.fatal(e);
+		}
+		return Collections.emptyIterator();
+	}
+	public static <T> ListIterator<T> newListIterator(Object wrapped) {
+		try {
+			if(Log.canWrap()) {
+				return new WrappedListIterator<>((ListIterator<T>) wrapped);
+			}
+			return (ListIterator<T>) wrapped;
+		} catch (ClassCastException e) {
+			logger.fatal(e);
+		}
+		return Collections.emptyListIterator();
 	}
 
 	private Containers() {

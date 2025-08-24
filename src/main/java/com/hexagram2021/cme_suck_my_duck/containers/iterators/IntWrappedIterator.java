@@ -2,14 +2,13 @@ package com.hexagram2021.cme_suck_my_duck.containers.iterators;
 
 import com.hexagram2021.cme_suck_my_duck.containers.AbstractWrappedContainer;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 
-import java.util.Iterator;
-
-public class WrappedIterator<T> extends AbstractWrappedContainer<Iterator<T>> implements Iterator<T> {
-	public WrappedIterator(Iterator<T> wrapped) {
+public class IntWrappedIterator extends AbstractWrappedContainer<IntIterator> implements IntIterator {
+	public IntWrappedIterator(IntIterator wrapped) {
 		super(wrapped);
 	}
-	public WrappedIterator(Iterator<T> wrapped, String traceId) {
+	public IntWrappedIterator(IntIterator wrapped, String traceId) {
 		super(wrapped, traceId);
 	}
 
@@ -24,10 +23,10 @@ public class WrappedIterator<T> extends AbstractWrappedContainer<Iterator<T>> im
 	}
 
 	@Override
-	public T next() {
-		this.logQuery("next()");
+	public int nextInt() {
+		this.logQuery("nextInt()");
 		try {
-			return this.wrapped.next();
+			return this.wrapped.nextInt();
 		} catch (RuntimeException e) {
 			throw TracedException.create(this.traceId, e);
 		}

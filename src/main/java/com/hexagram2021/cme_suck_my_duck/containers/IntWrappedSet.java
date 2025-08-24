@@ -1,15 +1,19 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
-import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.IntWrappedIterator;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import it.unimi.dsi.fastutil.ints.IntCollection;
+import it.unimi.dsi.fastutil.ints.IntIterator;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSpliterator;
 
-import java.util.*;
+import java.util.Collection;
 
-public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements Set<T> {
-	WrappedSet(Set<T> wrapped) {
+public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements IntSet {
+	IntWrappedSet(IntSet wrapped) {
 		super(wrapped);
 	}
-	WrappedSet(Set<T> wrapped, String traceId) {
+	IntWrappedSet(IntSet wrapped, String traceId) {
 		super(wrapped, traceId);
 	}
 
@@ -24,8 +28,8 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public boolean contains(Object o) {
-		this.logQuery("contains(Object)");
+	public boolean contains(int o) {
+		this.logQuery("contains(int)");
 		try {
 			return this.wrapped.contains(o);
 		} catch (RuntimeException e) {
@@ -34,9 +38,27 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public Iterator<T> iterator() {
+	public int[] toIntArray() {
+		try {
+			return this.wrapped.toIntArray();
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public int[] toArray(int[] a) {
+		try {
+			return this.wrapped.toArray(a);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public IntIterator iterator() {
 		this.logIteration("iterator()");
-		return new WrappedIterator<>(this.wrapped.iterator(), this.traceId);
+		return new IntWrappedIterator(this.wrapped.iterator(), this.traceId);
 	}
 
 	@Override
@@ -58,8 +80,8 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public boolean add(T t) {
-		this.logModify("add(Object)");
+	public boolean add(int t) {
+		this.logModify("add(int)");
 		try {
 			return this.wrapped.add(t);
 		} catch (RuntimeException e) {
@@ -68,8 +90,8 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public boolean remove(Object o) {
-		this.logModify("remove(Object)");
+	public boolean remove(int o) {
+		this.logModify("remove(int)");
 		try {
 			return this.wrapped.remove(o);
 		} catch (RuntimeException e) {
@@ -88,7 +110,7 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends T> c) {
+	public boolean addAll(Collection<? extends Integer> c) {
 		this.logModify("addAll(Collection)");
 		try {
 			return this.wrapped.addAll(c);
@@ -118,6 +140,46 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
+	public boolean containsAll(IntCollection c) {
+		this.logQuery("containsAll(IntCollection)");
+		try {
+			return this.wrapped.containsAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public boolean addAll(IntCollection c) {
+		this.logModify("addAll(IntCollection)");
+		try {
+			return this.wrapped.addAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public boolean removeAll(IntCollection c) {
+		this.logModify("removeAll(IntCollection)");
+		try {
+			return this.wrapped.removeAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public boolean retainAll(IntCollection c) {
+		this.logModify("retainAll(IntCollection)");
+		try {
+			return this.wrapped.retainAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
 	public void clear() {
 		this.logModify("clear()");
 		try {
@@ -128,7 +190,7 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public Spliterator<T> spliterator() {
+	public IntSpliterator spliterator() {
 		return this.wrapped.spliterator();
 	}
 }

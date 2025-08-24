@@ -2,20 +2,14 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 
 import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
 import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedListIterator;
-import com.hexagram2021.cme_suck_my_duck.utils.TraceLogger;
+import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
 
-public class WrappedList<T> implements List<T> {
-	final List<T> wrapped;
-
+public class WrappedList<T> extends AbstractWrappedContainer<List<T>> implements List<T> {
 	WrappedList(List<T> wrapped) {
-		if(wrapped instanceof WrappedList) {
-			this.wrapped = ((WrappedList<T>)wrapped).wrapped;
-		} else {
-			this.wrapped = wrapped;
-		}
+		super(wrapped);
 	}
 
 	@Override
@@ -30,14 +24,18 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public boolean contains(Object o) {
-		TraceLogger.debug("[Query] contains(Object)");
-		return this.wrapped.contains(o);
+		this.logQuery("contains(Object)");
+		try {
+			return this.wrapped.contains(o);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Iterator<T> iterator() {
-		TraceLogger.info("[Iteration] iterator()");
-		return new WrappedIterator<>(this.wrapped.iterator());
+		this.logIteration("iterator()");
+		return new WrappedIterator<>(this.wrapped.iterator(), this.traceId);
 	}
 
 	@Override
@@ -47,125 +45,214 @@ public class WrappedList<T> implements List<T> {
 
 	@Override
 	public <T1> T1[] toArray(T1[] a) {
-		return this.wrapped.toArray(a);
+		try {
+			return this.wrapped.toArray(a);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean add(T t) {
-		TraceLogger.info("[Modify] add(Object)");
-		return this.wrapped.add(t);
+		this.logModify("add(Object)");
+		try {
+			return this.wrapped.add(t);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		TraceLogger.info("[Modify] remove(Object)");
-		return this.wrapped.remove(o);
+		this.logModify("remove(Object)");
+		try {
+			return this.wrapped.remove(o);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@SuppressWarnings("SlowListContainsAll")
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		TraceLogger.debug("[Query] containsAll(Collection)");
-		return this.wrapped.containsAll(c);
+		this.logQuery("containsAll(Collection)");
+		try {
+			return this.wrapped.containsAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
-		TraceLogger.info("[Modify] addAll(Collection)");
-		return this.wrapped.addAll(c);
+		this.logModify("addAll(Collection)");
+		try {
+			return this.wrapped.addAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
-		TraceLogger.info("[Modify] addAll(int, Collection)");
-		return this.wrapped.addAll(index, c);
+		this.logModify("addAll(int, Collection)");
+		try {
+			return this.wrapped.addAll(index, c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		TraceLogger.info("[Modify] removeAll(Collection)");
-		return this.wrapped.removeAll(c);
+		this.logModify("removeAll(Collection)");
+		try {
+			return this.wrapped.removeAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		TraceLogger.info("[Modify] retainAll(Collection)");
-		return this.wrapped.retainAll(c);
+		this.logModify("retainAll(Collection)");
+		try {
+			return this.wrapped.retainAll(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void replaceAll(UnaryOperator<T> operator) {
-		TraceLogger.info("[Modify] replaceAll(UnaryOperator)");
-		this.wrapped.replaceAll(operator);
+		this.logModify("replaceAll(UnaryOperator)");
+		try {
+			this.wrapped.replaceAll(operator);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void sort(Comparator<? super T> c) {
-		TraceLogger.info("[Modify] sort(Comparator)");
-		this.wrapped.sort(c);
+		this.logModify("sort(Comparator)");
+		try {
+			this.wrapped.sort(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void clear() {
-		TraceLogger.info("[Modify] clear()");
-		this.wrapped.clear();
+		this.logModify("clear()");
+		try {
+			this.wrapped.clear();
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public T get(int index) {
-		TraceLogger.debug("[Query] get(int)");
-		return this.wrapped.get(index);
+		this.logQuery("get(int)");
+		try {
+			return this.wrapped.get(index);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public T set(int index, T element) {
-		TraceLogger.info("[Modify] set(int, Object)");
-		return this.wrapped.set(index, element);
+		this.logModify("set(int, Object)");
+		try {
+			return this.wrapped.set(index, element);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public void add(int index, T element) {
-		TraceLogger.info("[Modify] add(int, Object)");
-		this.wrapped.add(index, element);
+		this.logModify("add(int, Object)");
+		try {
+			this.wrapped.add(index, element);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public T remove(int index) {
-		TraceLogger.info("[Modify] remove(int)");
-		return this.wrapped.remove(index);
+		this.logModify("remove(int)");
+		try {
+			return this.wrapped.remove(index);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int indexOf(Object o) {
-		TraceLogger.debug("[Query] indexOf(Object)");
-		return this.wrapped.indexOf(o);
+		this.logQuery("indexOf(Object)");
+		try {
+			return this.wrapped.indexOf(o);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public int lastIndexOf(Object o) {
-		TraceLogger.debug("[Query] lastIndexOf(Object)");
-		return this.wrapped.lastIndexOf(o);
+		this.logQuery("lastIndexOf(Object)");
+		try {
+			return this.wrapped.lastIndexOf(o);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public ListIterator<T> listIterator() {
-		TraceLogger.info("[Iteration] listIterator()");
-		return new WrappedListIterator<>(this.wrapped.listIterator());
+		this.logIteration("listIterator()");
+		return new WrappedListIterator<>(this.wrapped.listIterator(), this.traceId);
 	}
 
 	@Override
 	public ListIterator<T> listIterator(int index) {
-		TraceLogger.info("[Iteration] listIterator(int)");
-		return new WrappedListIterator<>(this.wrapped.listIterator(index));
+		this.logIteration("listIterator(int)");
+		return new WrappedListIterator<>(this.wrapped.listIterator(index), this.traceId);
 	}
 
 	@Override
 	public List<T> subList(int fromIndex, int toIndex) {
-		return this.wrapped.subList(fromIndex, toIndex);
+		try {
+			return this.wrapped.subList(fromIndex, toIndex);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
 	public Spliterator<T> spliterator() {
 		return this.wrapped.spliterator();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		try {
+			return this.wrapped.equals(o);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+	@Override
+	public int hashCode() {
+		try {
+			return this.wrapped.hashCode();
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 }

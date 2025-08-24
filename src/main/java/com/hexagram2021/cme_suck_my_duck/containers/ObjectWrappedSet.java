@@ -1,15 +1,18 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
-import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.ObjectWrappedIterator;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ObjectSpliterator;
 
-import java.util.*;
+import java.util.Collection;
 
-public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements Set<T> {
-	WrappedSet(Set<T> wrapped) {
+public class ObjectWrappedSet<T> extends AbstractWrappedContainer<ObjectSet<T>> implements ObjectSet<T> {
+	ObjectWrappedSet(ObjectSet<T> wrapped) {
 		super(wrapped);
 	}
-	WrappedSet(Set<T> wrapped, String traceId) {
+	ObjectWrappedSet(ObjectSet<T> wrapped, String traceId) {
 		super(wrapped, traceId);
 	}
 
@@ -34,9 +37,9 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public Iterator<T> iterator() {
+	public ObjectIterator<T> iterator() {
 		this.logIteration("iterator()");
-		return new WrappedIterator<>(this.wrapped.iterator(), this.traceId);
+		return new ObjectWrappedIterator<>(this.wrapped.iterator(), this.traceId);
 	}
 
 	@Override
@@ -128,7 +131,7 @@ public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements S
 	}
 
 	@Override
-	public Spliterator<T> spliterator() {
+	public ObjectSpliterator<T> spliterator() {
 		return this.wrapped.spliterator();
 	}
 }

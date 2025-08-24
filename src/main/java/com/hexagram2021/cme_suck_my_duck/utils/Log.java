@@ -68,55 +68,58 @@ public final class Log {
 		}
 	}
 
-	private void log(Level level, String message) {
+	@SuppressWarnings("SameParameterValue")
+	private void log(Level level, String traceId, String message) {
 		if(level.level() >= LOG_LEVEL) {
-			this.TO_LOGS.add(new StringLogEntry(level.name(), message));
+			this.TO_LOGS.add(new StringLogEntry(level.name(), traceId, message));
 		}
 	}
-	void log(Level level, Throwable t) {
+	void log(Level level, String traceId, Throwable t) {
 		if(level.level() >= LOG_LEVEL) {
-			this.TO_LOGS.add(new ThrowableLogEntry(level.name(), t));
+			this.TO_LOGS.add(new ThrowableLogEntry(level.name(), traceId, t));
 		}
 	}
 
+	private static final String SYSTEM_TRACE_ID = "SYSTEM";
+
 	public void debug(String message) {
-		this.log(Level.DEBUG, message);
+		this.log(Level.DEBUG, SYSTEM_TRACE_ID, message);
 	}
 	public void debug(String format, Object... args) {
 		this.debug(String.format(format, args));
 	}
 	public void debug(Throwable t) {
-		this.log(Level.DEBUG, t);
+		this.log(Level.DEBUG, SYSTEM_TRACE_ID, t);
 	}
 
 	public void info(String message) {
-		this.log(Level.INFO, message);
+		this.log(Level.INFO, SYSTEM_TRACE_ID, message);
 	}
 	public void info(String format, Object... args) {
 		this.info(String.format(format, args));
 	}
 	public void info(Throwable t) {
-		this.log(Level.INFO, t);
+		this.log(Level.INFO, SYSTEM_TRACE_ID, t);
 	}
 
 	public void warn(String message) {
-		this.log(Level.WARN, message);
+		this.log(Level.WARN, SYSTEM_TRACE_ID, message);
 	}
 	public void warn(String format, Object... args) {
 		this.warn(String.format(format, args));
 	}
 	public void warn(Throwable t) {
-		this.log(Level.WARN, t);
+		this.log(Level.WARN, SYSTEM_TRACE_ID, t);
 	}
 
 	public void error(String message) {
-		this.log(Level.ERROR, message);
+		this.log(Level.ERROR, SYSTEM_TRACE_ID, message);
 	}
 	public void error(String format, Object... args) {
 		this.error(String.format(format, args));
 	}
 	public void error(Throwable t) {
-		this.log(Level.ERROR, t);
+		this.log(Level.ERROR, SYSTEM_TRACE_ID, t);
 	}
 
 	public void fatal(String message) {
@@ -144,7 +147,7 @@ public final class Log {
 			LOG_THREAD.join();
 		} catch (InterruptedException ignored) {
 		}
-		System.exit(1);
+		//System.exit(1);
 	}
 
 	public static String newDate() {
@@ -246,7 +249,7 @@ public final class Log {
 		}
 		try {
 			if (INSTANCE != null) {
-				AbstractLogEntry entry = new StringLogEntry(Level.INFO.name(), "Main thread (" + MAIN_THREAD.getName() + ") stopped. Log thread is stopping.");
+				AbstractLogEntry entry = new StringLogEntry(Level.INFO.name(), SYSTEM_TRACE_ID, "Main thread (" + MAIN_THREAD.getName() + ") stopped. Log thread is stopping.");
 				entry.writeTo(INSTANCE.WRITER);
 				INSTANCE.WRITER.close();
 			}

@@ -14,8 +14,8 @@ public class ThrowableLogEntry extends AbstractLogEntry {
 	private static final String CAUSE_CAPTION = "Caused by: ";
 	private static final String SUPPRESSED_CAPTION = "Suppressed: ";
 
-	public ThrowableLogEntry(String level, Throwable throwable) {
-		super(Log.newDate(), Thread.currentThread().getName(), level);
+	public ThrowableLogEntry(String level, String traceId, Throwable throwable) {
+		super(Log.newDate(), Thread.currentThread().getName(), level, traceId);
 		this.throwable = throwable;
 	}
 
@@ -24,7 +24,7 @@ public class ThrowableLogEntry extends AbstractLogEntry {
 		try {
 			Set<Throwable> dejaVu = Collections.newSetFromMap(new IdentityHashMap<>());
 			dejaVu.add(this.throwable);
-			writer.write(String.format("[%s] [%s] [%s]: %s\n", this.date, this.thread, this.level, this.throwable));
+			writer.write(String.format("[%s] [%s] [%s] [%s]: %s\n", this.date, this.thread, this.level, this.traceId, this.throwable));
 			writer.flush();
 			StackTraceElement[] trace = this.throwable.getStackTrace();
 			for (StackTraceElement traceElement : trace) {
