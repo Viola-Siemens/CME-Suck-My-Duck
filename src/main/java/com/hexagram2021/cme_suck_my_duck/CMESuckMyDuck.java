@@ -26,6 +26,9 @@ public class CMESuckMyDuck {
 	public static final int ASM_API_VERSION;
 	public static final boolean INJECT_METHOD;
 
+	@Nullable
+	public static final String TRACE_ID_UPDATER;
+
 	public static void main(String[] args) {
 		System.out.println("This project can only be used as javaagent.");
 		System.out.println("Usage:");
@@ -52,11 +55,15 @@ public class CMESuckMyDuck {
 		System.out.println(" -Dcme_suck_my_duck.log_wait_time=<milliseconds>");
 		System.out.println("\tDefault <milliseconds>=500, which means log file I/O will be triggered every half second. All cached stack traces will be logged after log file I/O.");
 		System.out.println(" -Dcme_suck_my_duck.whitelist_constructor_stacktrace=<str>");
-		System.out.println("\tDefault empty string, which means all containers will be monitored if class name matches and field name matches. If not empty, the container will only be monitored if any line in the stack trace where the container is constructed includes the content of <str>.");
+		System.out.println("\tDefault <str> is an empty string, which means all containers will be monitored if class name matches and field name matches. If not empty, the container will only be monitored if any line in the stack trace where the container is constructed includes the content of <str>.");
 		System.out.println(" -Dcme_suck_my_duck.transform_to_thread_safe=<bool>");
 		System.out.println("\tDefault <bool>=false. If true, no stack traces will be logged and the container will be converted into a thread-safe container. This is NOT recommended unless you like slowness and don't want to fix the problem.");
 		System.out.println(" -Dcme_suck_my_duck.inject_method=<bool>");
 		System.out.println("\tDefault <bool>=false. If true, you should use `-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<method name>` and whenever this method is called, you will receive a stack trace in log files.");
+		System.out.println(" -Dcme_suck_my_duck.stop_logging_if_exception_created=<bool>");
+		System.out.println("\tDefault <bool>=true. If false, it still keeps logging after critical exception being thrown.");
+		System.out.println(" -Dcme_suck_my_duck.trace_id_updater=<class full name>;<method name>");
+		System.out.println("\tDefault empty string. If not empty, the given method will also be called to update trace id, which might be useful in `inject_method` mode.");
 	}
 
 	public static void premain(String agentArg, Instrumentation inst) {
@@ -90,6 +97,16 @@ public class CMESuckMyDuck {
 			//Main
 			inst.addTransformer(new WrapContainerTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
 			logger.info("Successfully added transformer for field %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+		}
+		if(TRACE_ID_UPDATER != null && !TRACE_ID_UPDATER.isEmpty()) {
+			String[] updaterArgs = TRACE_ID_UPDATER.split(";");
+			if(updaterArgs.length < 2) {
+				logger.error("Failed to parse trace id updater arguments. Expect 2 arguments, found %d: [%s].", updaterArgs.length, Log.buildArrayString(updaterArgs));
+				return;
+			}
+			updaterArgs[0] = updaterArgs[0].replace(".", "/");
+			inst.addTransformer(new InjectTraceIdUpdaterTransformer(updaterArgs[0], updaterArgs[1]), true);
+			logger.info("Successfully added trace id updater for method %s of class %s.", updaterArgs[1], updaterArgs[0]);
 		}
 	}
 
@@ -226,7 +243,52 @@ public class CMESuckMyDuck {
 										Containers.logger.info("Injecting...");
 										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceIdGenerator", "getGlobalTraceId", "()Ljava/lang/String;", false);
 										this.visitLdcInsn("Trace");
-										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceLogger", "info", "(Ljava/lang/String;)V", false);
+										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceLogger", "info", "(Ljava/lang/String;Ljava/lang/String;)V", false);
+										Containers.logger.info("Injected.");
+									}
+								};
+							}
+							return mv;
+						}
+					}, 0);
+					return writer.toByteArray();
+				} catch(Exception e) {
+					Containers.logger.error(e);
+				}
+			}
+			return classFileBuffer;
+		}
+	}
+
+	static class InjectTraceIdUpdaterTransformer implements ClassFileTransformer {
+		final String className;
+		final String methodName;
+
+		public InjectTraceIdUpdaterTransformer(String className, String methodName) {
+			this.className = className;
+			this.methodName = methodName;
+		}
+
+		@Override
+		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
+			if (className.equals(this.className)) {
+				try {
+					Containers.logger.info("Found class " + this.className + ".");
+					ClassReader reader = new ClassReader(classFileBuffer);
+					ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+					reader.accept(new ClassVisitor(ASM_API_VERSION, writer) {
+						@Override
+						public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+							Containers.logger.debug("Visit method " + name + ".");
+							MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+							if(name.equals(InjectTraceIdUpdaterTransformer.this.methodName)) {
+								Containers.logger.info("Found injection point in method %s.", InjectTraceIdUpdaterTransformer.this.methodName);
+								return new MethodVisitor(ASM_API_VERSION, mv) {
+									@Override
+									public void visitCode() {
+										super.visitCode();
+										Containers.logger.info("Injecting...");
+										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceIdGenerator", "updateTraceId", "()V", false);
 										Containers.logger.info("Injected.");
 									}
 								};
@@ -291,5 +353,7 @@ public class CMESuckMyDuck {
 		} catch (Exception ignored) {
 		}
 		INJECT_METHOD = injectMethod;
+
+		TRACE_ID_UPDATER = System.getProperty("cme_suck_my_duck.trace_id_updater");
 	}
 }

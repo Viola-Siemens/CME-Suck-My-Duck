@@ -15,10 +15,14 @@ public enum Type {
 	ITERATOR("Iterator", "Ljava/util/Iterator;", Containers::newIterator),
 	LIST_ITERATOR("ListIterator", "Ljava/util/ListIterator;", Containers::newListIterator),
 	INT_SET("IntSet", "Lit/unimi/dsi/fastutil/ints/IntSet;", (object) -> FastContainers.newIntWrappedMap(object)),
+	LONG_SET("LongSet", "Lit/unimi/dsi/fastutil/longs/LongSet;", (object) -> FastContainers.newLongWrappedMap(object)),
 	OBJECT_SET("ObjectSet", "Lit/unimi/dsi/fastutil/objects/ObjectSet;", (object) -> FastContainers.newObjectWrappedSet(object)),
 	INT_2_OBJECT_MAP("Int2ObjectMap", "Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;", (object) -> FastContainers.newInt2ObjectWrappedMap(object)),
 	OBJECT_2_INT_MAP("Object2IntMap", "Lit/unimi/dsi/fastutil/objects/Object2IntMap;", (object) -> FastContainers.newObject2IntWrappedMap(object)),
+	LONG_2_OBJECT_MAP("Long2ObjectMap", "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;", (object) -> FastContainers.newLong2ObjectWrappedMap(object)),
+	OBJECT_2_LONG_MAP("Object2LongMap", "Lit/unimi/dsi/fastutil/objects/Object2LongMap;", (object) -> FastContainers.newObject2LongWrappedMap(object)),
 	INT_ITERATOR("IntIterator", "Lit/unimi/dsi/fastutil/ints/IntIterator;", FastContainers::newIntIterator),
+	LONG_ITERATOR("LongIterator", "Lit/unimi/dsi/fastutil/longs/LongIterator;", FastContainers::newLongIterator),
 	OBJECT_ITERATOR("ObjectIterator", "Lit/unimi/dsi/fastutil/objects/ObjectIterator;", FastContainers::newObjectIterator);
 
 	private static final Map<String, Type> BY_NAME;
