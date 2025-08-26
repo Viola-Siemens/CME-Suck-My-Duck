@@ -5,21 +5,19 @@ import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
 import java.nio.file.StandardOpenOption;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.hexagram2021.cme_suck_my_duck.utils.SharedConstants.LOG_PATH;
 
 @SuppressWarnings("unchecked")
 public final class Containers {
 	public static final Log logger;
-	private static final boolean transformToThreadSafe;
+	static final boolean transformToThreadSafe;
 	
 	public static <T> List<T> newWrappedList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
 				if(transformToThreadSafe) {
-					return new CopyOnWriteArrayList<>((List<T>) wrapped);
+					return Collections.synchronizedList((List<T>) wrapped);
 				}
 				return new WrappedList<>((List<T>) wrapped);
 			}
@@ -33,9 +31,7 @@ public final class Containers {
 		try {
 			if(Log.canWrap()) {
 				if(transformToThreadSafe) {
-					Set<T> ret = ConcurrentHashMap.newKeySet();
-					ret.addAll((Set<T>) wrapped);
-					return ret;
+					return Collections.synchronizedSet((Set<T>) wrapped);
 				}
 				return new WrappedSet<>((Set<T>) wrapped);
 			}
@@ -49,7 +45,7 @@ public final class Containers {
 		try {
 			if(Log.canWrap()) {
 				if(transformToThreadSafe) {
-					return new ConcurrentHashMap<>((Map<K, V>) wrapped);
+					return Collections.synchronizedMap((Map<K, V>) wrapped);
 				}
 				return new WrappedMap<>((Map<K, V>) wrapped);
 			}

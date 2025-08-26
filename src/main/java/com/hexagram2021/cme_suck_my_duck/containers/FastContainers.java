@@ -9,12 +9,16 @@ import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.*;
 
 import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
+import static com.hexagram2021.cme_suck_my_duck.containers.Containers.transformToThreadSafe;
 
 @SuppressWarnings("unchecked")
 public final class FastContainers {
-	public static IntSet newIntWrappedMap(Object wrapped) {
+	public static IntSet newIntWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return IntSets.synchronize((IntSet) wrapped);
+				}
 				return new IntWrappedSet((IntSet) wrapped);
 			}
 			return (IntSet) wrapped;
@@ -23,9 +27,12 @@ public final class FastContainers {
 		}
 		return IntSets.emptySet();
 	}
-	public static LongSet newLongWrappedMap(Object wrapped) {
+	public static LongSet newLongWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return LongSets.synchronize((LongSet) wrapped);
+				}
 				return new LongWrappedSet((LongSet) wrapped);
 			}
 			return (LongSet) wrapped;
@@ -37,6 +44,9 @@ public final class FastContainers {
 	public static <T> ObjectSet<T> newObjectWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return ObjectSets.synchronize((ObjectSet<T>) wrapped);
+				}
 				return new ObjectWrappedSet<>((ObjectSet<T>) wrapped);
 			}
 			return (ObjectSet<T>) wrapped;
@@ -48,6 +58,9 @@ public final class FastContainers {
 	public static <V> Int2ObjectMap<V> newInt2ObjectWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return Int2ObjectMaps.synchronize((Int2ObjectMap<V>) wrapped);
+				}
 				return new Int2ObjectWrappedMap<>((Int2ObjectMap<V>) wrapped);
 			}
 			return (Int2ObjectMap<V>) wrapped;
@@ -59,6 +72,9 @@ public final class FastContainers {
 	public static <K> Object2IntMap<K> newObject2IntWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return Object2IntMaps.synchronize((Object2IntMap<K>) wrapped);
+				}
 				return new Object2IntWrappedMap<>((Object2IntMap<K>) wrapped);
 			}
 			return (Object2IntMap<K>) wrapped;
@@ -70,6 +86,9 @@ public final class FastContainers {
 	public static <V> Long2ObjectMap<V> newLong2ObjectWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return Long2ObjectMaps.synchronize((Long2ObjectMap<V>) wrapped);
+				}
 				return new Long2ObjectWrappedMap<>((Long2ObjectMap<V>) wrapped);
 			}
 			return (Long2ObjectMap<V>) wrapped;
@@ -81,6 +100,9 @@ public final class FastContainers {
 	public static <K> Object2LongMap<K> newObject2LongWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
+				if(transformToThreadSafe) {
+					return Object2LongMaps.synchronize((Object2LongMap<K>) wrapped);
+				}
 				return new Object2LongWrappedMap<>((Object2LongMap<K>) wrapped);
 			}
 			return (Object2LongMap<K>) wrapped;
