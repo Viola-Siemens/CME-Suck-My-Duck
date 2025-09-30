@@ -6,16 +6,19 @@
       <option name="ignoredModules">
         <list>
           <option value="CMESuckMyDuck" />
+          <option value="CMESuckMyDuck" />
         </list>
       </option>
       <option name="ignoredPackages">
         <list>
           <option value="com.google.guava:guava:31.1-jre" />
+          <option value="org.apache.commons:commons-lang3:3.12.0" />
         </list>
       </option>
       <option name="ignoredReasons">
         <list>
           <option value="不可利用" />
+          <option value="Not exploitable" />
         </list>
       </option>
     </inspection_tool>
