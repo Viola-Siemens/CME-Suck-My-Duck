@@ -3,7 +3,10 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Spliterator;
 
 public class WrappedSet<T> extends AbstractWrappedContainer<Set<T>> implements Set<T> {
 	WrappedSet(Set<T> wrapped) {

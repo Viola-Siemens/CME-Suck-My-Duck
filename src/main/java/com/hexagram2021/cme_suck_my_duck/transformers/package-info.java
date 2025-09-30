@@ -2,7 +2,7 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 
-package com.hexagram2021.cme_suck_my_duck;
+package com.hexagram2021.cme_suck_my_duck.transformers;
 
 import com.hexagram2021.cme_suck_my_duck.annotations.FieldsAreNonnullByDefault;
 import com.hexagram2021.cme_suck_my_duck.annotations.MethodsReturnNonnullByDefault;

@@ -1,6 +1,7 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
-import com.hexagram2021.cme_suck_my_duck.containers.iterators.*;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedListIterator;
 import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
 import java.nio.file.StandardOpenOption;

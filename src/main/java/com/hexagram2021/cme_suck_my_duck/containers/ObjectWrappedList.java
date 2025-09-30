@@ -1,23 +1,37 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
-import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
-import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedListIterator;
+import com.hexagram2021.cme_suck_my_duck.containers.iterators.ObjectWrappedListIterator;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import it.unimi.dsi.fastutil.objects.ObjectListIterator;
+import it.unimi.dsi.fastutil.objects.ObjectSpliterator;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.UnaryOperator;
 
-public class WrappedList<T> extends AbstractWrappedContainer<List<T>> implements List<T> {
-	WrappedList(List<T> wrapped) {
+public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>> implements ObjectList<T> {
+	ObjectWrappedList(ObjectList<T> wrapped) {
 		super(wrapped);
 	}
-	WrappedList(List<T> wrapped, String traceId) {
+	ObjectWrappedList(ObjectList<T> wrapped, String traceId) {
 		super(wrapped, traceId);
 	}
 
 	@Override
 	public int size() {
 		return this.wrapped.size();
+	}
+
+	@Override
+	public void size(int size) {
+		this.logModify("size(int)");
+		try {
+			this.wrapped.size(size);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
 	}
 
 	@Override
@@ -36,9 +50,9 @@ public class WrappedList<T> extends AbstractWrappedContainer<List<T>> implements
 	}
 
 	@Override
-	public Iterator<T> iterator() {
+	public ObjectListIterator<T> iterator() {
 		this.logIteration("iterator()");
-		return new WrappedIterator<>(this.wrapped.iterator(), this.traceId);
+		return new ObjectWrappedListIterator<>(this.wrapped.iterator(), this.traceId);
 	}
 
 	@Override
@@ -147,6 +161,16 @@ public class WrappedList<T> extends AbstractWrappedContainer<List<T>> implements
 	}
 
 	@Override
+	public void unstableSort(Comparator<? super T> c) {
+		this.logModify("unstableSort(Comparator)");
+		try {
+			this.wrapped.unstableSort(c);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
 	public void clear() {
 		this.logModify("clear()");
 		try {
@@ -217,28 +241,68 @@ public class WrappedList<T> extends AbstractWrappedContainer<List<T>> implements
 	}
 
 	@Override
-	public ListIterator<T> listIterator() {
+	public ObjectListIterator<T> listIterator() {
 		this.logIteration("listIterator()");
-		return new WrappedListIterator<>(this.wrapped.listIterator(), this.traceId);
+		return new ObjectWrappedListIterator<>(this.wrapped.listIterator(), this.traceId);
 	}
 
 	@Override
-	public ListIterator<T> listIterator(int index) {
+	public ObjectListIterator<T> listIterator(int index) {
 		this.logIteration("listIterator(int)");
-		return new WrappedListIterator<>(this.wrapped.listIterator(index), this.traceId);
+		return new ObjectWrappedListIterator<>(this.wrapped.listIterator(index), this.traceId);
 	}
 
 	@Override
-	public List<T> subList(int fromIndex, int toIndex) {
+	public ObjectList<T> subList(int fromIndex, int toIndex) {
 		try {
-			return new WrappedList<>(this.wrapped.subList(fromIndex, toIndex), this.traceId);
+			return new ObjectWrappedList<>(this.wrapped.subList(fromIndex, toIndex), this.traceId);
 		} catch (RuntimeException e) {
 			throw TracedException.create(this.traceId, e);
 		}
 	}
 
 	@Override
-	public Spliterator<T> spliterator() {
+	public void getElements(int from, Object[] a, int offset, int length) {
+		this.logQuery("getElements(int, Object[], int, int)");
+		try {
+			this.wrapped.getElements(from, a, offset, length);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public void removeElements(int from, int to) {
+		this.logModify("removeElements(int, int)");
+		try {
+			this.wrapped.removeElements(from, to);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public void addElements(int index, T[] a) {
+		this.logModify("addElements(int, Object[])");
+		try {
+			this.wrapped.addElements(index, a);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public void addElements(int index, T[] a, int offset, int length) {
+		this.logModify("addElements(int, Object[], int, int)");
+		try {
+			this.wrapped.addElements(index, a, offset, length);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public ObjectSpliterator<T> spliterator() {
 		return this.wrapped.spliterator();
 	}
 
@@ -254,6 +318,16 @@ public class WrappedList<T> extends AbstractWrappedContainer<List<T>> implements
 	public int hashCode() {
 		try {
 			return this.wrapped.hashCode();
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
+	@Override
+	public int compareTo(List<? extends T> o) {
+		this.logQuery("compareTo(List)");
+		try {
+			return this.wrapped.compareTo(o);
 		} catch (RuntimeException e) {
 			throw TracedException.create(this.traceId, e);
 		}

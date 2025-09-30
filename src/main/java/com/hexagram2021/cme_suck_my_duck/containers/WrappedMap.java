@@ -3,8 +3,12 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
 
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class WrappedMap<K, V> extends AbstractWrappedContainer<Map<K, V>> implements Map<K, V> {
 	WrappedMap(Map<K, V> wrapped) {

@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.hexagram2021.cme_suck_my_duck'
-version = '1.0.8'
+version = '1.1.0'
 
 compileJava {
     sourceCompatibility = 8
