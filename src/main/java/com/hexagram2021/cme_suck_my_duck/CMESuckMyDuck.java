@@ -8,8 +8,11 @@ import com.hexagram2021.cme_suck_my_duck.utils.SharedConstants;
 import org.objectweb.asm.Opcodes;
 
 import javax.annotation.Nullable;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
@@ -24,10 +27,33 @@ public class CMESuckMyDuck {
 	@Nullable
 	public static final Integer LOCAL_VAR_INDEX;
 
+	public static final Integer MATCH_LOCAL_INDEX;
+
 	@Nullable
 	public static final String TRACE_ID_UPDATER;
 
 	public static void main(String[] args) {
+		if(args.length == 3) {
+			try {
+				FileInputStream is = new FileInputStream(args[0]);
+				FileOutputStream os = new FileOutputStream(args[1]);
+				byte[] bytes = new byte[is.available()];
+				if(is.read(bytes) != -1) {
+					String[] agentArgs = args[2].split(";");
+					ClassFileTransformer transformer = getTransformer(agentArgs);
+					if(transformer != null) {
+						os.write(transformer.transform(null, args[0].replace(".", "/"), null, null, bytes));
+						os.close();
+						is.close();
+						return;
+					}
+				}
+				os.close();
+				is.close();
+			} catch (Exception ignored) {
+			}
+		}
+
 		System.out.println("This project can only be used as javaagent.");
 		System.out.println("Usage:");
 		System.out.println("\t-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<field name>;<type>;<phase>");
@@ -75,48 +101,12 @@ public class CMESuckMyDuck {
 		}
 
 		String[] args = agentArg.split(";");
-		if(INJECT_METHOD) {
-			if (LOCAL_VAR_INDEX != null) {
-				logger.error("Cannot inject method when local variable index is specified.");
-				return;
-			}
-			if (args.length < 2) {
-				logger.error("Failed to parse agent arguments. Expect 2 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
-				return;
-			}
-			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
-			args[0] = args[0].replace(".", "/");
-			// Inject method Main
-			inst.addTransformer(new InjectLogTransformer(args[0], args[1]), true);
-			logger.info("Successfully added transformer for method %s of class %s.", args[1], args[0]);
-		} else if(LOCAL_VAR_INDEX != null) {
-			if(LOCAL_VAR_INDEX < 0) {
-				logger.error("Local variable index cannot be negative.");
-				return;
-			}
-			if (args.length < 3) {
-				logger.error("Failed to parse agent arguments. Expect 3 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
-				return;
-			}
-			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
-			args[0] = args[0].replace(".", "/");
-			// launch([Ljava.lang.String?)V => launch([Ljava.lang.String;)V
-			args[1] = args[1].replace("?", ";");
-			// Local Main
-			inst.addTransformer(new WrapLocalContainerTransformer(args[0], args[1], Type.fromName(args[2]), LOCAL_VAR_INDEX), true);
-			logger.info("Successfully added transformer for local field (index %d) of method %s of class %s, type %s.", LOCAL_VAR_INDEX, args[1], args[0], args[2]);
-		} else {
-			//Parse
-			if (args.length < 4) {
-				logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
-				return;
-			}
-			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
-			args[0] = args[0].replace(".", "/");
-			// Main
-			inst.addTransformer(new WrapContainerTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3])), true);
-			logger.info("Successfully added transformer for field %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+		ClassFileTransformer transformer = getTransformer(args);
+		if(transformer == null) {
+			return;
 		}
+		inst.addTransformer(transformer, true);
+
 		if(TRACE_ID_UPDATER != null && !TRACE_ID_UPDATER.isEmpty()) {
 			String[] updaterArgs = TRACE_ID_UPDATER.split(";");
 			if(updaterArgs.length < 2) {
@@ -127,6 +117,54 @@ public class CMESuckMyDuck {
 			inst.addTransformer(new InjectTraceIdUpdaterTransformer(updaterArgs[0], updaterArgs[1]), true);
 			logger.info("Successfully added trace id updater for method %s of class %s.", updaterArgs[1], updaterArgs[0]);
 		}
+	}
+
+	@Nullable
+	private static ClassFileTransformer getTransformer(String[] args) {
+		ClassFileTransformer transformer;
+		if(INJECT_METHOD) {
+			if (LOCAL_VAR_INDEX != null) {
+				logger.error("Cannot inject method when local variable index is specified.");
+				return null;
+			}
+			if (args.length < 2) {
+				logger.error("Failed to parse agent arguments. Expect 2 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
+				return null;
+			}
+			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
+			args[0] = args[0].replace(".", "/");
+			// Inject method Main
+			transformer = new InjectLogTransformer(args[0], args[1]);
+			logger.info("Successfully build transformer for method %s of class %s.", args[1], args[0]);
+		} else if(LOCAL_VAR_INDEX != null) {
+			if(LOCAL_VAR_INDEX < 0) {
+				logger.error("Local variable index cannot be negative.");
+				return null;
+			}
+			if (args.length < 3) {
+				logger.error("Failed to parse agent arguments. Expect 3 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
+				return null;
+			}
+			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
+			args[0] = args[0].replace(".", "/");
+			// launch([Ljava.lang.String?)V => launch([Ljava.lang.String;)V
+			args[1] = args[1].replace("?", ";");
+			// Local Main
+			transformer = new WrapLocalContainerTransformer(args[0], args[1], Type.fromName(args[2]), LOCAL_VAR_INDEX, MATCH_LOCAL_INDEX);
+			logger.info("Successfully build transformer for local field (index %d) of method %s of class %s, type %s.", LOCAL_VAR_INDEX, args[1], args[0], args[2]);
+		} else {
+			//Parse
+			if (args.length < 4) {
+				logger.error("Failed to parse agent arguments. Expect 4 arguments, found %d: [%s].", args.length, Log.buildArrayString(args));
+				return null;
+			}
+			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
+			args[0] = args[0].replace(".", "/");
+			// Main
+			transformer = new WrapContainerTransformer(args[0], args[1], Type.fromName(args[2]), Phase.fromName(args[3]));
+			logger.info("Successfully build transformer for field %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
+		}
+		return transformer;
 	}
 
 	static {
@@ -150,6 +188,13 @@ public class CMESuckMyDuck {
 		} catch (Exception ignored) {
 		}
 		LOCAL_VAR_INDEX = localVarIndex;
+
+		Integer matchLocalIndex = -1;
+		try {
+			matchLocalIndex = Integer.parseInt(System.getProperty("cme_suck_my_duck.match_local_index"));
+		} catch (Exception ignored) {
+		}
+		MATCH_LOCAL_INDEX = matchLocalIndex;
 
 		TRACE_ID_UPDATER = System.getProperty("cme_suck_my_duck.trace_id_updater");
 	}
