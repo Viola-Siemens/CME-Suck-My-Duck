@@ -256,7 +256,7 @@ public class LongWrappedList extends AbstractWrappedContainer<LongList> implemen
 
 	@Override
 	public long set(int index, long element) {
-		this.logModify("set(int, long)");
+		this.logQuery("set(int, long)");
 		try {
 			return this.wrapped.set(index, element);
 		} catch (RuntimeException e) {
@@ -377,6 +377,7 @@ public class LongWrappedList extends AbstractWrappedContainer<LongList> implemen
 
 	@Override
 	public LongSpliterator spliterator() {
+		this.logIteration("spliterator()");
 		return this.wrapped.spliterator();
 	}
 

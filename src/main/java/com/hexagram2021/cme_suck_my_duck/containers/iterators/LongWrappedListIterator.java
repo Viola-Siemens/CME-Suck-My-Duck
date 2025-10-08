@@ -84,7 +84,7 @@ public class LongWrappedListIterator extends AbstractWrappedContainer<LongListIt
 
 	@Override
 	public void set(long t) {
-		this.logModify("set(long)");
+		this.logQuery("set(long)");
 		try {
 			this.wrapped.set(t);
 		} catch (RuntimeException e) {

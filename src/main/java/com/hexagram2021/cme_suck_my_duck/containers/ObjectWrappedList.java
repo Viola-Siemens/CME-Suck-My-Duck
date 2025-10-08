@@ -192,7 +192,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public T set(int index, T element) {
-		this.logModify("set(int, Object)");
+		this.logQuery("set(int, Object)");
 		try {
 			return this.wrapped.set(index, element);
 		} catch (RuntimeException e) {
@@ -303,6 +303,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public ObjectSpliterator<T> spliterator() {
+		this.logIteration("spliterator()");
 		return this.wrapped.spliterator();
 	}
 

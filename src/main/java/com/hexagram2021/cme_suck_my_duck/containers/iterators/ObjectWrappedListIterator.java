@@ -84,7 +84,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public void set(K t) {
-		this.logModify("set(Object)");
+		this.logQuery("set(Object)");
 		try {
 			this.wrapped.set(t);
 		} catch (RuntimeException e) {

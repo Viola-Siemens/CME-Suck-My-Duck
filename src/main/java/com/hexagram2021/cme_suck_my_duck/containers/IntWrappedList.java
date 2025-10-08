@@ -256,7 +256,7 @@ public class IntWrappedList extends AbstractWrappedContainer<IntList> implements
 
 	@Override
 	public int set(int index, int element) {
-		this.logModify("set(int, int)");
+		this.logQuery("set(int, int)");
 		try {
 			return this.wrapped.set(index, element);
 		} catch (RuntimeException e) {
@@ -377,6 +377,7 @@ public class IntWrappedList extends AbstractWrappedContainer<IntList> implements
 
 	@Override
 	public IntSpliterator spliterator() {
+		this.logIteration("spliterator()");
 		return this.wrapped.spliterator();
 	}
 

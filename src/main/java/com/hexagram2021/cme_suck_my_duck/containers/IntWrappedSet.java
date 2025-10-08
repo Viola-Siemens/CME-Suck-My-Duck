@@ -191,6 +191,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public IntSpliterator spliterator() {
+		this.logIteration("spliterator()");
 		return this.wrapped.spliterator();
 	}
 }

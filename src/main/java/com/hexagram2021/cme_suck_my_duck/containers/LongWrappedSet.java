@@ -191,6 +191,7 @@ public class LongWrappedSet extends AbstractWrappedContainer<LongSet> implements
 
 	@Override
 	public LongSpliterator spliterator() {
+		this.logIteration("spliterator()");
 		return this.wrapped.spliterator();
 	}
 }

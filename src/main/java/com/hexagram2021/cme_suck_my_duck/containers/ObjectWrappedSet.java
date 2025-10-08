@@ -132,6 +132,7 @@ public class ObjectWrappedSet<T> extends AbstractWrappedContainer<ObjectSet<T>> 
 
 	@Override
 	public ObjectSpliterator<T> spliterator() {
+		this.logIteration("spliterator()");
 		return this.wrapped.spliterator();
 	}
 }
