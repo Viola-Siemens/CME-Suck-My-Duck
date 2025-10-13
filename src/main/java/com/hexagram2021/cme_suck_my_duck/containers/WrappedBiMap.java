@@ -1,20 +1,21 @@
 package com.hexagram2021.cme_suck_my_duck.containers;
 
+import com.google.common.collect.BiMap;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class WrappedMap<K, V> extends AbstractWrappedContainer<Map<K, V>> implements Map<K, V> {
-	WrappedMap(Map<K, V> wrapped) {
+public class WrappedBiMap<K, V> extends AbstractWrappedContainer<BiMap<K, V>> implements BiMap<K, V> {
+	WrappedBiMap(BiMap<K, V> wrapped) {
 		super(wrapped);
 	}
-	WrappedMap(Map<K, V> wrapped, String traceId) {
+	WrappedBiMap(BiMap<K, V> wrapped, String traceId) {
 		super(wrapped, traceId);
 	}
 
@@ -64,6 +65,17 @@ public class WrappedMap<K, V> extends AbstractWrappedContainer<Map<K, V>> implem
 		}
 	}
 
+	@CheckForNull
+	@Override
+	public V forcePut(K key, V value) {
+		this.logModify("forcePut(Object, Object)");
+		try {
+			return this.wrapped.forcePut(key, value);
+		} catch (RuntimeException e) {
+			throw TracedException.create(this.traceId, e);
+		}
+	}
+
 	@Override
 	public V remove(Object key) {
 		this.logModify("remove(Object)");
@@ -101,9 +113,15 @@ public class WrappedMap<K, V> extends AbstractWrappedContainer<Map<K, V>> implem
 	}
 
 	@Override
-	public Collection<V> values() {
+	public Set<V> values() {
 		this.logQuery("values()");
-		return this.wrapped.values();
+		return new WrappedSet<>(this.wrapped.values(), this.traceId);
+	}
+
+	@Override
+	public BiMap<V, K> inverse() {
+		this.logQuery("inverse()");
+		return new WrappedBiMap<>(this.wrapped.inverse(), this.traceId);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.hexagram2021.cme_suck_my_duck;
 
 import com.hexagram2021.cme_suck_my_duck.containers.Containers;
 import com.hexagram2021.cme_suck_my_duck.containers.FastContainers;
+import com.hexagram2021.cme_suck_my_duck.containers.GuavaContainers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +30,10 @@ public enum Type {
 	OBJECT_ITERATOR("ObjectIterator", "Lit/unimi/dsi/fastutil/objects/ObjectIterator;", (object) -> FastContainers.newObjectIterator(object)),
 	INT_LIST_ITERATOR("IntListIterator", "Lit/unimi/dsi/fastutil/ints/IntListIterator;", (object) -> FastContainers.newIntListIterator(object)),
 	LONG_LIST_ITERATOR("LongListIterator", "Lit/unimi/dsi/fastutil/longs/LongListIterator;", (object) -> FastContainers.newLongListIterator(object)),
-	OBJECT_LIST_ITERATOR("ObjectListIterator", "Lit/unimi/dsi/fastutil/objects/ObjectListIterator;", (object) -> FastContainers.newObjectListIterator(object));
+	OBJECT_LIST_ITERATOR("ObjectListIterator", "Lit/unimi/dsi/fastutil/objects/ObjectListIterator;", (object) -> FastContainers.newObjectListIterator(object)),
+	BI_MAP("BiMap", "Lcom/google/common/collect/BiMap;", (object) -> GuavaContainers.newWrappedBiMap(object)),
+	MULTISET("Multiset", "Lcom/google/common/collect/Multiset;", (object) -> GuavaContainers.newWrappedMultiset(object)),
+	MULTIMAP("Multimap", "Lcom/google/common/collect/Multimap;", (object) -> GuavaContainers.newWrappedMultimap(object));
 
 	private static final Map<String, Type> BY_NAME;
 	private final String typeName;

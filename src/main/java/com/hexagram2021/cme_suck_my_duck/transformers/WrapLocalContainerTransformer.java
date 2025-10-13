@@ -45,7 +45,7 @@ public class WrapLocalContainerTransformer implements ClassFileTransformer {
 								public void visitVarInsn(int opcode, int varIndex) {
 									super.visitVarInsn(opcode, varIndex);
 									if (opcode == Opcodes.ASTORE && varIndex == WrapLocalContainerTransformer.this.localVarIndex) {
-										if(this.matchCount == -1 || this.matchCount == WrapLocalContainerTransformer.this.matchLocalIndex) {
+										if(WrapLocalContainerTransformer.this.matchLocalIndex == -1 || this.matchCount == WrapLocalContainerTransformer.this.matchLocalIndex) {
 											Containers.logger.info("Injecting...");
 											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapLocalContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
 											super.visitVarInsn(Opcodes.ALOAD, varIndex);
