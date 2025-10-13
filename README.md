@@ -97,6 +97,20 @@ If set, you should use `-javaagent:CMESuckMyDuck-<version>.jar=<class full name>
 
 Use system property `-Dcme_suck_my_duck.ignore_threads=<thread name1>;<thread name2>;<thread name3>;...` to ignore some thread that is expected to modify the given container (or call the given method). For example, `-Dcme_suck_my_duck.ignore_threads="Server thread"`.
 
+### Stop logging early
+
+Use system property `-Dcme_suck_my_duck.stop_logging_if_exception_created=false` to stop logging if critical error occurs.
+
+### Trace ID Updater
+
+Use system property `-Dcme_suck_my_duck.trace_id_updater=<class full name>;<method name>` to update trace ID when calling the given method. This might be useful in inject mode.
+
+### Monitoring Local Variables
+
+Use system property `-Dcme_suck_my_duck.local_var_index=<index>` to monitor local variable at given index in the given method.
+
+If set, you should use `-javaagent:CMESuckMyDuck-<version>.jar=<class full name>;<method name>;<type>`. By the way, the index can be reused by different local variables. So you might have to use `-Dcme_suck_my_duck.match_local_index=<ordinal>` to specify the ordinal of `ASTORE <index>` operation to indicate which local variable to monitor.
+
 ## Experiments
 
 Code (simulates concurrent modification):
