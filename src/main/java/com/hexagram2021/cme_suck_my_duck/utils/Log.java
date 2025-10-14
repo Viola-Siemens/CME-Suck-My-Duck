@@ -250,6 +250,18 @@ public final class Log {
 		}
 		try {
 			if (INSTANCE != null) {
+				Thread.sleep(1L);
+				while(!INSTANCE.TO_LOGS.isEmpty()) {
+					AbstractLogEntry entry = INSTANCE.TO_LOGS.poll();
+					entry.writeTo(INSTANCE.WRITER);
+					lines += 1;
+					if(lines >= FILE_MAX_ENTRIES) {
+						INSTANCE.WRITER.close();
+						Files.move(Paths.get(INSTANCE.path + ".log"), Paths.get(INSTANCE.path + "-old.log"), StandardCopyOption.REPLACE_EXISTING);
+						INSTANCE.WRITER = INSTANCE.setLogFile();
+						lines = 0;
+					}
+				}
 				AbstractLogEntry entry = new StringLogEntry(Level.INFO.name(), SYSTEM_TRACE_ID, "Main thread (" + MAIN_THREAD.getName() + ") stopped. Log thread is stopping.");
 				entry.writeTo(INSTANCE.WRITER);
 				INSTANCE.WRITER.close();
