@@ -5,6 +5,8 @@ import com.hexagram2021.cme_suck_my_duck.Type;
 import com.hexagram2021.cme_suck_my_duck.containers.Containers;
 import org.objectweb.asm.*;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
@@ -61,7 +63,17 @@ public class WrapLocalContainerTransformer implements ClassFileTransformer {
 						return mv;
 					}
 				}, 0);
-				return writer.toByteArray();
+				byte[] bytes = writer.toByteArray();
+				if (Containers.OUTPUT_CLASS_BINARY) {
+					Containers.logger.info("Outputting class binary...");
+					String[] split = className.split("/");
+					try(FileOutputStream out = new FileOutputStream(split[split.length - 1] + ".class")) {
+						out.write(bytes);
+					} catch (IOException e) {
+						Containers.logger.error("Failed to output binary class file.", e);
+					}
+				}
+				return bytes;
 			} catch (Exception e) {
 				Containers.logger.error(e);
 			}

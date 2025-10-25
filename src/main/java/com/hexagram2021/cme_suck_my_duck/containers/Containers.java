@@ -12,12 +12,13 @@ import static com.hexagram2021.cme_suck_my_duck.utils.SharedConstants.LOG_PATH;
 @SuppressWarnings("unchecked")
 public final class Containers {
 	public static final Log logger;
-	static final boolean transformToThreadSafe;
+	static final boolean TRANSFORM_TO_THREAD_SAFE;
+	public static final boolean OUTPUT_CLASS_BINARY;
 	
 	public static <T> List<T> newWrappedList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Collections.synchronizedList((List<T>) wrapped);
 				}
 				return new WrappedList<>((List<T>) wrapped);
@@ -31,7 +32,7 @@ public final class Containers {
 	public static <T> Set<T> newWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Collections.synchronizedSet((Set<T>) wrapped);
 				}
 				return new WrappedSet<>((Set<T>) wrapped);
@@ -45,7 +46,7 @@ public final class Containers {
 	public static <K, V> Map<K, V> newWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Collections.synchronizedMap((Map<K, V>) wrapped);
 				}
 				return new WrappedMap<>((Map<K, V>) wrapped);
@@ -56,7 +57,7 @@ public final class Containers {
 		}
 		return Collections.emptyMap();
 	}
-	public static <T> Iterator<T> newIterator(Object wrapped) {
+	public static <T> Iterator<T> newWrappedIterator(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
 				return new WrappedIterator<>((Iterator<T>) wrapped);
@@ -67,7 +68,7 @@ public final class Containers {
 		}
 		return Collections.emptyIterator();
 	}
-	public static <T> ListIterator<T> newListIterator(Object wrapped) {
+	public static <T> ListIterator<T> newWrappedListIterator(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
 				return new WrappedListIterator<>((ListIterator<T>) wrapped);
@@ -77,6 +78,23 @@ public final class Containers {
 			logger.fatal(e);
 		}
 		return Collections.emptyListIterator();
+	}
+
+	/**
+	 * @deprecated Not recommend to use this method, only when you find wrapped list can't work.
+	 */
+	@SuppressWarnings({"java:S1133", "java:S1319"})
+	@Deprecated
+	public static <T> ArrayList<T> newWrappedArrayList(Object wrapped) {
+		try {
+			if(Log.canWrap()) {
+				return new WrappedArrayList<>((ArrayList<T>) wrapped);
+			}
+			return (ArrayList<T>) wrapped;
+		} catch (ClassCastException e) {
+			logger.fatal(e);
+		}
+		return new ArrayList<>();
 	}
 
 	private Containers() {
@@ -92,7 +110,15 @@ public final class Containers {
 		try {
 			fixConcurrent = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.transform_to_thread_safe"));
 		} catch (Exception ignored) {
+			// Ignored
 		}
-		transformToThreadSafe = fixConcurrent;
+		TRANSFORM_TO_THREAD_SAFE = fixConcurrent;
+		boolean outputClassBinary = false;
+		try {
+			outputClassBinary = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.output_class_binary"));
+		} catch (Exception ignored) {
+			// Ignored
+		}
+		OUTPUT_CLASS_BINARY = outputClassBinary;
 	}
 }

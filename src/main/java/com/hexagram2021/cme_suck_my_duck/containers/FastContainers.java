@@ -7,14 +7,14 @@ import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.*;
 
 import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
-import static com.hexagram2021.cme_suck_my_duck.containers.Containers.transformToThreadSafe;
+import static com.hexagram2021.cme_suck_my_duck.containers.Containers.TRANSFORM_TO_THREAD_SAFE;
 
 @SuppressWarnings("unchecked")
 public final class FastContainers {
 	public static IntList newIntWrappedList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return IntLists.synchronize((IntList) wrapped);
 				}
 				return new IntWrappedList((IntList) wrapped);
@@ -29,7 +29,7 @@ public final class FastContainers {
 	public static LongList newLongWrappedList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return LongLists.synchronize((LongList) wrapped);
 				}
 				return new LongWrappedList((LongList) wrapped);
@@ -44,7 +44,7 @@ public final class FastContainers {
 	public static <T> ObjectList<T> newObjectWrappedList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return ObjectLists.synchronize((ObjectList<T>) wrapped);
 				}
 				return new ObjectWrappedList<>((ObjectList<T>) wrapped);
@@ -59,7 +59,7 @@ public final class FastContainers {
 	public static IntSet newIntWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return IntSets.synchronize((IntSet) wrapped);
 				}
 				return new IntWrappedSet((IntSet) wrapped);
@@ -73,7 +73,7 @@ public final class FastContainers {
 	public static LongSet newLongWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return LongSets.synchronize((LongSet) wrapped);
 				}
 				return new LongWrappedSet((LongSet) wrapped);
@@ -87,7 +87,7 @@ public final class FastContainers {
 	public static <T> ObjectSet<T> newObjectWrappedSet(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return ObjectSets.synchronize((ObjectSet<T>) wrapped);
 				}
 				return new ObjectWrappedSet<>((ObjectSet<T>) wrapped);
@@ -101,7 +101,7 @@ public final class FastContainers {
 	public static <V> Int2ObjectMap<V> newInt2ObjectWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Int2ObjectMaps.synchronize((Int2ObjectMap<V>) wrapped);
 				}
 				return new Int2ObjectWrappedMap<>((Int2ObjectMap<V>) wrapped);
@@ -115,7 +115,7 @@ public final class FastContainers {
 	public static <K> Object2IntMap<K> newObject2IntWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Object2IntMaps.synchronize((Object2IntMap<K>) wrapped);
 				}
 				return new Object2IntWrappedMap<>((Object2IntMap<K>) wrapped);
@@ -129,7 +129,7 @@ public final class FastContainers {
 	public static <V> Long2ObjectMap<V> newLong2ObjectWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Long2ObjectMaps.synchronize((Long2ObjectMap<V>) wrapped);
 				}
 				return new Long2ObjectWrappedMap<>((Long2ObjectMap<V>) wrapped);
@@ -143,7 +143,7 @@ public final class FastContainers {
 	public static <K> Object2LongMap<K> newObject2LongWrappedMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Object2LongMaps.synchronize((Object2LongMap<K>) wrapped);
 				}
 				return new Object2LongWrappedMap<>((Object2LongMap<K>) wrapped);

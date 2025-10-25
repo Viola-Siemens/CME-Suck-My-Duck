@@ -28,8 +28,6 @@ public abstract class AbstractWrappedContainer<W> {
 		this.traceId = traceId;
 	}
 
-
-
 	protected void logQuery(String signature) {
 		TraceLogger.debug(this.traceId, "[Query] " + signature);
 	}

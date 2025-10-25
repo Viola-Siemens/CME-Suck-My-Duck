@@ -4,14 +4,14 @@ import com.google.common.collect.*;
 import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
 import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
-import static com.hexagram2021.cme_suck_my_duck.containers.Containers.transformToThreadSafe;
+import static com.hexagram2021.cme_suck_my_duck.containers.Containers.TRANSFORM_TO_THREAD_SAFE;
 
 @SuppressWarnings("unchecked")
 public final class GuavaContainers {
 	public static <K, V> BiMap<K, V> newWrappedBiMap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Maps.synchronizedBiMap((BiMap<K, V>) wrapped);
 				}
 				return new WrappedBiMap<>((BiMap<K, V>) wrapped);
@@ -26,7 +26,7 @@ public final class GuavaContainers {
 	public static <T> Multiset<T> newWrappedMultiset(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					throw new UnsupportedOperationException("Cannot transform Multiset to thread-safe.");
 				}
 				return new WrappedMultiset<>((Multiset<T>) wrapped);
@@ -41,7 +41,7 @@ public final class GuavaContainers {
 	public static <K, V> Multimap<K, V> newWrappedMultimap(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
-				if(transformToThreadSafe) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
 					return Multimaps.synchronizedMultimap((Multimap<K, V>) wrapped);
 				}
 				return new WrappedMultimap<>((Multimap<K, V>) wrapped);

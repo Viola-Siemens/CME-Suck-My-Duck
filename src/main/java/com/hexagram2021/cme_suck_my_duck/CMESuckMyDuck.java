@@ -34,23 +34,19 @@ public class CMESuckMyDuck {
 
 	public static void main(String[] args) {
 		if(args.length == 3) {
-			try {
-				FileInputStream is = new FileInputStream(args[0]);
-				FileOutputStream os = new FileOutputStream(args[1]);
+			try(FileInputStream is = new FileInputStream(args[0]);
+				FileOutputStream os = new FileOutputStream(args[1])) {
 				byte[] bytes = new byte[is.available()];
 				if(is.read(bytes) != -1) {
 					String[] agentArgs = args[2].split(";");
 					ClassFileTransformer transformer = getTransformer(agentArgs);
 					if(transformer != null) {
 						os.write(transformer.transform(null, args[0].replace(".", "/"), null, null, bytes));
-						os.close();
-						is.close();
 						return;
 					}
 				}
-				os.close();
-				is.close();
 			} catch (Exception ignored) {
+				// Ignored
 			}
 		}
 
@@ -62,11 +58,11 @@ public class CMESuckMyDuck {
 		System.out.println("Which means, each modification of list `f_203816_`, which is a nonstatic member in `ReloadableResourceManager`, will be traced - when add and remove is called, a stacktrace will be printed to the log.");
 		System.out.println("All valid types:");
 		for(Type type: Type.values()) {
-			System.out.printf(" -\t%s\n", type.getTypeName());
+			System.out.printf(" -\t%s%n", type.getTypeName());
 		}
 		System.out.println("All valid phases:");
 		for(Phase phase: Phase.values()) {
-			System.out.printf(" -\t%s\n", phase.getPhaseName());
+			System.out.printf(" -\t%s%n", phase.getPhaseName());
 		}
 		System.out.println();
 		System.out.println("Other JVM args:");
@@ -173,12 +169,14 @@ public class CMESuckMyDuck {
 			int level = Integer.parseInt(System.getProperty("cme_suck_my_duck.asm_api_version"));
 			asmApiVersion = level << 16;
 		} catch (Exception ignored) {
+			// Ignored
 		}
 		ASM_API_VERSION = asmApiVersion;
 		boolean injectMethod = false;
 		try {
 			injectMethod = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.inject_method"));
 		} catch (Exception ignored) {
+			// Ignored
 		}
 		INJECT_METHOD = injectMethod;
 
@@ -186,6 +184,7 @@ public class CMESuckMyDuck {
 		try {
 			localVarIndex = Integer.parseInt(System.getProperty("cme_suck_my_duck.local_var_index"));
 		} catch (Exception ignored) {
+			// Ignored
 		}
 		LOCAL_VAR_INDEX = localVarIndex;
 
@@ -193,6 +192,7 @@ public class CMESuckMyDuck {
 		try {
 			matchLocalIndex = Integer.parseInt(System.getProperty("cme_suck_my_duck.match_local_index"));
 		} catch (Exception ignored) {
+			// Ignored
 		}
 		MATCH_LOCAL_INDEX = matchLocalIndex;
 
