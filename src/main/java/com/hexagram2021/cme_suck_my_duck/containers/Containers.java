@@ -83,9 +83,9 @@ public final class Containers {
 	/**
 	 * @deprecated Not recommend to use this method, only when you find wrapped list can't work.
 	 */
-	@SuppressWarnings({"java:S1133", "java:S1319"})
+	@SuppressWarnings("java:S1133")
 	@Deprecated
-	public static <T> ArrayList<T> newWrappedArrayList(Object wrapped) {
+	public static <T> List<T> newWrappedArrayList(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
 				return new WrappedArrayList<>((ArrayList<T>) wrapped);

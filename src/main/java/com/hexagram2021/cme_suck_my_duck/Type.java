@@ -15,8 +15,8 @@ public enum Type {
 	MAP("Map", "Ljava/util/Map;", Containers::newWrappedMap),
 	ITERATOR("Iterator", "Ljava/util/Iterator;", Containers::newWrappedIterator),
 	LIST_ITERATOR("ListIterator", "Ljava/util/ListIterator;", Containers::newWrappedListIterator),
-	@Deprecated
-	ARRAY_LIST("ArrayList", "Ljava/util/ArrayList;", Containers::newWrappedArrayList),
+	@Deprecated @SuppressWarnings("java:S1874")
+	ARRAY_LIST("ArrayList", "Ljava/util/List;", Containers::newWrappedArrayList),
 	INT_LIST("IntList", "Lit/unimi/dsi/fastutil/ints/IntList;", object -> FastContainers.newIntWrappedList(object)),
 	LONG_LIST("LongList", "Lit/unimi/dsi/fastutil/longs/LongList;", object -> FastContainers.newLongWrappedList(object)),
 	OBJECT_LIST("ObjectList", "Lit/unimi/dsi/fastutil/objects/ObjectList;", object -> FastContainers.newObjectWrappedList(object)),
