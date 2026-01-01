@@ -27,17 +27,19 @@ public final class Log {
 	private static final Thread LOG_THREAD;
 	private static final Thread MAIN_THREAD;
 
+	public static final LogStrategies LOG_STRATEGY;
+
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-	private final Queue<AbstractLogEntry> TO_LOGS = new ConcurrentLinkedDeque<>();
+	private final Queue<AbstractLogEntry> toLogs = new ConcurrentLinkedDeque<>();
 	private final String path;
 	private final StandardOpenOption[] openOptions;
-	private Writer WRITER;
+	private Writer writer;
 
 	public Log(String path, StandardOpenOption... openOptions) {
 		this.path = path;
 		this.openOptions = openOptions;
-		this.WRITER = this.setLogFile();
+		this.writer = this.setLogFile();
 		this.info("Log level: " + LOG_LEVEL);
 
 		INSTANCE = this;
@@ -72,12 +74,12 @@ public final class Log {
 	@SuppressWarnings("SameParameterValue")
 	private void log(Level level, String traceId, String message) {
 		if(level.level() >= LOG_LEVEL) {
-			this.TO_LOGS.add(new StringLogEntry(level.name(), traceId, message));
+			this.toLogs.add(new StringLogEntry(level.name(), traceId, message));
 		}
 	}
 	void log(Level level, String traceId, Throwable t) {
 		if(level.level() >= LOG_LEVEL) {
-			this.TO_LOGS.add(new ThrowableLogEntry(level.name(), traceId, t));
+			this.toLogs.add(new ThrowableLogEntry(level.name(), traceId, t));
 		}
 	}
 
@@ -129,6 +131,7 @@ public final class Log {
 		try {
 			LOG_THREAD.join();
 		} catch (InterruptedException ignored) {
+			Thread.currentThread().interrupt();
 		}
 		//System.exit(1);
 	}
@@ -138,6 +141,7 @@ public final class Log {
 		try {
 			LOG_THREAD.join();
 		} catch (InterruptedException ignored) {
+			Thread.currentThread().interrupt();
 		}
 		//System.exit(1);
 	}
@@ -147,6 +151,7 @@ public final class Log {
 		try {
 			LOG_THREAD.join();
 		} catch (InterruptedException ignored) {
+			Thread.currentThread().interrupt();
 		}
 		//System.exit(1);
 	}
@@ -172,18 +177,21 @@ public final class Log {
 		try {
 			level = Integer.parseInt(System.getProperty("cme_suck_my_duck.log_level"));
 		} catch (Exception ignored) {
+			// ignore
 		}
 		LOG_LEVEL = level;
 		long logWaitTime = 500L;
 		try {
 			logWaitTime = Long.parseLong(System.getProperty("cme_suck_my_duck.log_wait_time"));
 		} catch (Exception ignored) {
+			// ignore
 		}
 		LOG_WAIT_TIME = logWaitTime;
 		int fileMaxEntries = 1000;
 		try {
 			fileMaxEntries = Integer.parseInt(System.getProperty("cme_suck_my_duck.file_max_entries"));
 		} catch (Exception ignored) {
+			// ignore
 		}
 		FILE_MAX_ENTRIES = fileMaxEntries;
 		WHITELIST_CONSTRUCTOR_STACKTRACE = System.getProperty("cme_suck_my_duck.whitelist_constructor_stacktrace");
@@ -197,6 +205,8 @@ public final class Log {
 		LOG_THREAD.setDaemon(true);
 		LOG_THREAD.start();
 		MAIN_THREAD = Thread.currentThread();
+
+		LOG_STRATEGY = LogStrategies.of(System.getProperty("cme_suck_my_duck.log_strategy"));
 	}
 
 	public static boolean canWrap() {
@@ -233,17 +243,20 @@ public final class Log {
 				if(INSTANCE == null) {
 					continue;
 				}
-				while(!INSTANCE.TO_LOGS.isEmpty()) {
-					AbstractLogEntry entry = INSTANCE.TO_LOGS.poll();
-					entry.writeTo(INSTANCE.WRITER);
+				while(!INSTANCE.toLogs.isEmpty()) {
+					AbstractLogEntry entry = INSTANCE.toLogs.poll();
+					entry.writeTo(INSTANCE.writer);
 					lines += 1;
 					if(lines >= FILE_MAX_ENTRIES) {
-						INSTANCE.WRITER.close();
+						INSTANCE.writer.close();
 						Files.move(Paths.get(INSTANCE.path + ".log"), Paths.get(INSTANCE.path + "-old.log"), StandardCopyOption.REPLACE_EXISTING);
-						INSTANCE.WRITER = INSTANCE.setLogFile();
+						INSTANCE.writer = INSTANCE.setLogFile();
 						lines = 0;
 					}
 				}
+			} catch (InterruptedException e) {
+				System.err.printf("Error sleeping log thread: %s\n", e);
+				Thread.currentThread().interrupt();
 			} catch (Exception e) {
 				System.err.printf("Error writing log: %s\n", e);
 			}
@@ -251,21 +264,24 @@ public final class Log {
 		try {
 			if (INSTANCE != null) {
 				Thread.sleep(1L);
-				while(!INSTANCE.TO_LOGS.isEmpty()) {
-					AbstractLogEntry entry = INSTANCE.TO_LOGS.poll();
-					entry.writeTo(INSTANCE.WRITER);
+				while(!INSTANCE.toLogs.isEmpty()) {
+					AbstractLogEntry entry = INSTANCE.toLogs.poll();
+					entry.writeTo(INSTANCE.writer);
 					lines += 1;
 					if(lines >= FILE_MAX_ENTRIES) {
-						INSTANCE.WRITER.close();
+						INSTANCE.writer.close();
 						Files.move(Paths.get(INSTANCE.path + ".log"), Paths.get(INSTANCE.path + "-old.log"), StandardCopyOption.REPLACE_EXISTING);
-						INSTANCE.WRITER = INSTANCE.setLogFile();
+						INSTANCE.writer = INSTANCE.setLogFile();
 						lines = 0;
 					}
 				}
 				AbstractLogEntry entry = new StringLogEntry(Level.INFO.name(), SYSTEM_TRACE_ID, "Main thread (" + MAIN_THREAD.getName() + ") stopped. Log thread is stopping.");
-				entry.writeTo(INSTANCE.WRITER);
-				INSTANCE.WRITER.close();
+				entry.writeTo(INSTANCE.writer);
+				INSTANCE.writer.close();
 			}
+		} catch (InterruptedException e) {
+			System.err.printf("Error sleeping log thread: %s\n", e);
+			Thread.currentThread().interrupt();
 		} catch (Exception ignored) {
 		}
 	}

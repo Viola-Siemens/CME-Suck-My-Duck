@@ -28,13 +28,19 @@ public abstract class AbstractWrappedContainer<W> {
 		this.traceId = traceId;
 	}
 
-	protected void logQuery(String signature) {
-		TraceLogger.debug(this.traceId, "[Query] " + signature);
+	protected void logQuery(String signature, boolean shouldLog) {
+		if(shouldLog) {
+			TraceLogger.debug(this.traceId, "[Query] " + signature);
+		}
 	}
-	protected void logIteration(String signature) {
-		TraceLogger.info(this.traceId, "[Iteration] " + signature);
+	protected void logIteration(String signature, boolean shouldLog) {
+		if(shouldLog) {
+			TraceLogger.info(this.traceId, "[Iteration] " + signature);
+		}
 	}
-	protected void logModify(String signature) {
-		TraceLogger.info(this.traceId, "[Modify] " + signature);
+	protected void logModify(String signature, boolean shouldLog) {
+		if(shouldLog) {
+			TraceLogger.info(this.traceId, "[Modify] " + signature);
+		}
 	}
 }
