@@ -2,6 +2,7 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 
 import com.hexagram2021.cme_suck_my_duck.containers.iterators.IntWrappedIterator;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import com.hexagram2021.cme_suck_my_duck.utils.Log;
 import it.unimi.dsi.fastutil.ints.IntCollection;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -29,7 +30,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean contains(int o) {
-		this.logQuery("contains(int)");
+		this.logQuery("contains(int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.contains(o);
 		} catch (RuntimeException e) {
@@ -57,7 +58,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public IntIterator iterator() {
-		this.logIteration("iterator()");
+		this.logIteration("iterator()", Log.LOG_STRATEGY.logAnyway());
 		return new IntWrappedIterator(this.wrapped.iterator(), this.traceId);
 	}
 
@@ -81,7 +82,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean add(int t) {
-		this.logModify("add(int)");
+		this.logModify("add(int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.add(t);
 		} catch (RuntimeException e) {
@@ -91,7 +92,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean remove(int o) {
-		this.logModify("remove(int)");
+		this.logModify("remove(int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.remove(o);
 		} catch (RuntimeException e) {
@@ -101,7 +102,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		this.logQuery("containsAll(Collection)");
+		this.logQuery("containsAll(Collection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.containsAll(c);
 		} catch (RuntimeException e) {
@@ -111,7 +112,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean addAll(Collection<? extends Integer> c) {
-		this.logModify("addAll(Collection)");
+		this.logModify("addAll(Collection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.addAll(c);
 		} catch (RuntimeException e) {
@@ -121,7 +122,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		this.logModify("removeAll(Collection)");
+		this.logModify("removeAll(Collection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.removeAll(c);
 		} catch (RuntimeException e) {
@@ -131,7 +132,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		this.logModify("retainAll(Collection)");
+		this.logModify("retainAll(Collection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.retainAll(c);
 		} catch (RuntimeException e) {
@@ -141,7 +142,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean containsAll(IntCollection c) {
-		this.logQuery("containsAll(IntCollection)");
+		this.logQuery("containsAll(IntCollection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.containsAll(c);
 		} catch (RuntimeException e) {
@@ -151,7 +152,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean addAll(IntCollection c) {
-		this.logModify("addAll(IntCollection)");
+		this.logModify("addAll(IntCollection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.addAll(c);
 		} catch (RuntimeException e) {
@@ -161,7 +162,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean removeAll(IntCollection c) {
-		this.logModify("removeAll(IntCollection)");
+		this.logModify("removeAll(IntCollection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.removeAll(c);
 		} catch (RuntimeException e) {
@@ -171,7 +172,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public boolean retainAll(IntCollection c) {
-		this.logModify("retainAll(IntCollection)");
+		this.logModify("retainAll(IntCollection)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.retainAll(c);
 		} catch (RuntimeException e) {
@@ -181,7 +182,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public void clear() {
-		this.logModify("clear()");
+		this.logModify("clear()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.clear();
 		} catch (RuntimeException e) {
@@ -191,7 +192,7 @@ public class IntWrappedSet extends AbstractWrappedContainer<IntSet> implements I
 
 	@Override
 	public IntSpliterator spliterator() {
-		this.logIteration("spliterator()");
+		this.logIteration("spliterator()", Log.LOG_STRATEGY.logAnyway());
 		return this.wrapped.spliterator();
 	}
 }

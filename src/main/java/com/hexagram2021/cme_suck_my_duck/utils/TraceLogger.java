@@ -1,9 +1,7 @@
 package com.hexagram2021.cme_suck_my_duck.utils;
 
 import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
-import static com.hexagram2021.cme_suck_my_duck.utils.Log.LOG_LEVEL;
-import static com.hexagram2021.cme_suck_my_duck.utils.Log.Level;
-import static com.hexagram2021.cme_suck_my_duck.utils.Log.shouldIgnoreThread;
+import static com.hexagram2021.cme_suck_my_duck.utils.Log.*;
 
 //SuckTrace::new is too slow so we use this class to check ignore thread before create throwable instance.
 public final class TraceLogger {

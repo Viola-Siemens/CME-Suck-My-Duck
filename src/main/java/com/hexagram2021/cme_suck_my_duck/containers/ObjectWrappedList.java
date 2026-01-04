@@ -2,10 +2,12 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 
 import com.hexagram2021.cme_suck_my_duck.containers.iterators.ObjectWrappedListIterator;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import com.hexagram2021.cme_suck_my_duck.utils.Log;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSpliterator;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -26,7 +28,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void size(int size) {
-		this.logModify("size(int)");
+		this.logModify("size(int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.size(size);
 		} catch (RuntimeException e) {
@@ -41,7 +43,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean contains(Object o) {
-		this.logQuery("contains(Object)");
+		this.logQuery("contains(Object)", Log.LOG_STRATEGY.test(o));
 		try {
 			return this.wrapped.contains(o);
 		} catch (RuntimeException e) {
@@ -51,7 +53,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public ObjectListIterator<T> iterator() {
-		this.logIteration("iterator()");
+		this.logIteration("iterator()", Log.LOG_STRATEGY.logAnyway());
 		return new ObjectWrappedListIterator<>(this.wrapped.iterator(), this.traceId);
 	}
 
@@ -71,7 +73,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean add(T t) {
-		this.logModify("add(Object)");
+		this.logModify("add(Object)", Log.LOG_STRATEGY.test(t));
 		try {
 			return this.wrapped.add(t);
 		} catch (RuntimeException e) {
@@ -81,7 +83,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean remove(Object o) {
-		this.logModify("remove(Object)");
+		this.logModify("remove(Object)", Log.LOG_STRATEGY.test(o));
 		try {
 			return this.wrapped.remove(o);
 		} catch (RuntimeException e) {
@@ -92,7 +94,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 	@SuppressWarnings("SlowListContainsAll")
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		this.logQuery("containsAll(Collection)");
+		this.logQuery("containsAll(Collection)", c.stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.containsAll(c);
 		} catch (RuntimeException e) {
@@ -102,7 +104,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
-		this.logModify("addAll(Collection)");
+		this.logModify("addAll(Collection)", c.stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.addAll(c);
 		} catch (RuntimeException e) {
@@ -112,7 +114,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean addAll(int index, Collection<? extends T> c) {
-		this.logModify("addAll(int, Collection)");
+		this.logModify("addAll(int, Collection)", c.stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.addAll(index, c);
 		} catch (RuntimeException e) {
@@ -122,7 +124,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		this.logModify("removeAll(Collection)");
+		this.logModify("removeAll(Collection)", c.stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.removeAll(c);
 		} catch (RuntimeException e) {
@@ -132,7 +134,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		this.logModify("retainAll(Collection)");
+		this.logModify("retainAll(Collection)", c.stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.retainAll(c);
 		} catch (RuntimeException e) {
@@ -142,7 +144,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void replaceAll(UnaryOperator<T> operator) {
-		this.logModify("replaceAll(UnaryOperator)");
+		this.logModify("replaceAll(UnaryOperator)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.replaceAll(operator);
 		} catch (RuntimeException e) {
@@ -152,7 +154,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void sort(Comparator<? super T> c) {
-		this.logModify("sort(Comparator)");
+		this.logModify("sort(Comparator)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.sort(c);
 		} catch (RuntimeException e) {
@@ -162,7 +164,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void unstableSort(Comparator<? super T> c) {
-		this.logModify("unstableSort(Comparator)");
+		this.logModify("unstableSort(Comparator)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.unstableSort(c);
 		} catch (RuntimeException e) {
@@ -172,7 +174,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void clear() {
-		this.logModify("clear()");
+		this.logModify("clear()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.clear();
 		} catch (RuntimeException e) {
@@ -182,7 +184,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public T get(int index) {
-		this.logQuery("get(int)");
+		this.logQuery("get(int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.get(index);
 		} catch (RuntimeException e) {
@@ -192,7 +194,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public T set(int index, T element) {
-		this.logQuery("set(int, Object)");
+		this.logQuery("set(int, Object)", Log.LOG_STRATEGY.test(element));
 		try {
 			return this.wrapped.set(index, element);
 		} catch (RuntimeException e) {
@@ -202,7 +204,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void add(int index, T element) {
-		this.logModify("add(int, Object)");
+		this.logModify("add(int, Object)", Log.LOG_STRATEGY.test(element));
 		try {
 			this.wrapped.add(index, element);
 		} catch (RuntimeException e) {
@@ -212,7 +214,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public T remove(int index) {
-		this.logModify("remove(int)");
+		this.logModify("remove(int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.remove(index);
 		} catch (RuntimeException e) {
@@ -222,7 +224,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public int indexOf(Object o) {
-		this.logQuery("indexOf(Object)");
+		this.logQuery("indexOf(Object)", Log.LOG_STRATEGY.test(o));
 		try {
 			return this.wrapped.indexOf(o);
 		} catch (RuntimeException e) {
@@ -232,7 +234,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public int lastIndexOf(Object o) {
-		this.logQuery("lastIndexOf(Object)");
+		this.logQuery("lastIndexOf(Object)", Log.LOG_STRATEGY.test(o));
 		try {
 			return this.wrapped.lastIndexOf(o);
 		} catch (RuntimeException e) {
@@ -242,13 +244,13 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public ObjectListIterator<T> listIterator() {
-		this.logIteration("listIterator()");
+		this.logIteration("listIterator()", Log.LOG_STRATEGY.logAnyway());
 		return new ObjectWrappedListIterator<>(this.wrapped.listIterator(), this.traceId);
 	}
 
 	@Override
 	public ObjectListIterator<T> listIterator(int index) {
-		this.logIteration("listIterator(int)");
+		this.logIteration("listIterator(int)", Log.LOG_STRATEGY.logAnyway());
 		return new ObjectWrappedListIterator<>(this.wrapped.listIterator(index), this.traceId);
 	}
 
@@ -263,7 +265,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void getElements(int from, Object[] a, int offset, int length) {
-		this.logQuery("getElements(int, Object[], int, int)");
+		this.logQuery("getElements(int, Object[], int, int)", Arrays.stream(a).anyMatch(Log.LOG_STRATEGY));
 		try {
 			this.wrapped.getElements(from, a, offset, length);
 		} catch (RuntimeException e) {
@@ -273,7 +275,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void removeElements(int from, int to) {
-		this.logModify("removeElements(int, int)");
+		this.logModify("removeElements(int, int)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.removeElements(from, to);
 		} catch (RuntimeException e) {
@@ -283,7 +285,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void addElements(int index, T[] a) {
-		this.logModify("addElements(int, Object[])");
+		this.logModify("addElements(int, Object[])", Arrays.stream(a).anyMatch(Log.LOG_STRATEGY));
 		try {
 			this.wrapped.addElements(index, a);
 		} catch (RuntimeException e) {
@@ -293,7 +295,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public void addElements(int index, T[] a, int offset, int length) {
-		this.logModify("addElements(int, Object[], int, int)");
+		this.logModify("addElements(int, Object[], int, int)", Arrays.stream(a).anyMatch(Log.LOG_STRATEGY));
 		try {
 			this.wrapped.addElements(index, a, offset, length);
 		} catch (RuntimeException e) {
@@ -303,7 +305,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public ObjectSpliterator<T> spliterator() {
-		this.logIteration("spliterator()");
+		this.logIteration("spliterator()", Log.LOG_STRATEGY.logAnyway());
 		return this.wrapped.spliterator();
 	}
 
@@ -326,7 +328,7 @@ public class ObjectWrappedList<T> extends AbstractWrappedContainer<ObjectList<T>
 
 	@Override
 	public int compareTo(List<? extends T> o) {
-		this.logQuery("compareTo(List)");
+		this.logQuery("compareTo(List)", o.stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.compareTo(o);
 		} catch (RuntimeException e) {

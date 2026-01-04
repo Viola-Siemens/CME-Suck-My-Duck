@@ -3,8 +3,8 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 import com.google.common.collect.*;
 import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
-import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
 import static com.hexagram2021.cme_suck_my_duck.containers.Containers.TRANSFORM_TO_THREAD_SAFE;
+import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
 
 @SuppressWarnings("unchecked")
 public final class GuavaContainers {

@@ -6,8 +6,8 @@ import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.*;
 
-import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
 import static com.hexagram2021.cme_suck_my_duck.containers.Containers.TRANSFORM_TO_THREAD_SAFE;
+import static com.hexagram2021.cme_suck_my_duck.containers.Containers.logger;
 
 @SuppressWarnings("unchecked")
 public final class FastContainers {

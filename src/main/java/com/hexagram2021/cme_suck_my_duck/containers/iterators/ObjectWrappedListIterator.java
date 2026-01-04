@@ -2,6 +2,7 @@ package com.hexagram2021.cme_suck_my_duck.containers.iterators;
 
 import com.hexagram2021.cme_suck_my_duck.containers.AbstractWrappedContainer;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import com.hexagram2021.cme_suck_my_duck.utils.Log;
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 
 public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<ObjectListIterator<K>> implements ObjectListIterator<K> {
@@ -14,7 +15,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public boolean hasNext() {
-		this.logQuery("hasNext()");
+		this.logQuery("hasNext()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.hasNext();
 		} catch (RuntimeException e) {
@@ -24,7 +25,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public K next() {
-		this.logQuery("next()");
+		this.logQuery("next()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.next();
 		} catch (RuntimeException e) {
@@ -34,7 +35,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public boolean hasPrevious() {
-		this.logQuery("hasPrevious()");
+		this.logQuery("hasPrevious()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.hasPrevious();
 		} catch (RuntimeException e) {
@@ -44,7 +45,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public K previous() {
-		this.logQuery("previous()");
+		this.logQuery("previous()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.previous();
 		} catch (RuntimeException e) {
@@ -54,7 +55,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public int nextIndex() {
-		this.logQuery("nextIndex()");
+		this.logQuery("nextIndex()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.nextIndex();
 		} catch (RuntimeException e) {
@@ -64,7 +65,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public int previousIndex() {
-		this.logQuery("previousIndex()");
+		this.logQuery("previousIndex()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.previousIndex();
 		} catch (RuntimeException e) {
@@ -74,7 +75,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public void remove() {
-		this.logModify("remove()");
+		this.logModify("remove()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.remove();
 		} catch (RuntimeException e) {
@@ -84,7 +85,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public void set(K t) {
-		this.logQuery("set(Object)");
+		this.logQuery("set(Object)", Log.LOG_STRATEGY.test(t));
 		try {
 			this.wrapped.set(t);
 		} catch (RuntimeException e) {
@@ -94,7 +95,7 @@ public class ObjectWrappedListIterator<K> extends AbstractWrappedContainer<Objec
 
 	@Override
 	public void add(K t) {
-		this.logModify("add(Object)");
+		this.logModify("add(Object)", Log.LOG_STRATEGY.test(t));
 		try {
 			this.wrapped.add(t);
 		} catch (RuntimeException e) {

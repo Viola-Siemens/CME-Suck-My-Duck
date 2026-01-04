@@ -3,11 +3,13 @@ package com.hexagram2021.cme_suck_my_duck.containers;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset;
 import com.hexagram2021.cme_suck_my_duck.exceptions.TracedException;
+import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
 import javax.annotation.CheckForNull;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, V>> implements Multimap<K, V> {
 	WrappedMultimap(Multimap<K, V> wrapped) {
@@ -26,7 +28,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public boolean containsKey(@CheckForNull Object key) {
-		this.logQuery("containsKey(Object)");
+		this.logQuery("containsKey(Object)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.containsKey(key);
 		} catch (RuntimeException e) {
@@ -36,7 +38,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public boolean containsValue(@CheckForNull Object value) {
-		this.logQuery("containsValue(Object)");
+		this.logQuery("containsValue(Object)", Log.LOG_STRATEGY.test(value));
 		try {
 			return this.wrapped.containsValue(value);
 		} catch (RuntimeException e) {
@@ -46,7 +48,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public boolean containsEntry(@CheckForNull Object key, @CheckForNull Object value) {
-		this.logQuery("containsEntry(Object, Object)");
+		this.logQuery("containsEntry(Object, Object)", Log.LOG_STRATEGY.test(value));
 		try {
 			return this.wrapped.containsEntry(key, value);
 		} catch (RuntimeException e) {
@@ -56,13 +58,13 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public Collection<V> get(K key) {
-		this.logQuery("get(Object)");
+		this.logQuery("get(Object)", Log.LOG_STRATEGY.logAnyway());
 		return this.wrapped.get(key);
 	}
 
 	@Override
 	public boolean put(K key, V value) {
-		this.logModify("put(Object, Object)");
+		this.logModify("put(Object, Object)", Log.LOG_STRATEGY.test(value));
 		try {
 			return this.wrapped.put(key, value);
 		} catch (RuntimeException e) {
@@ -72,7 +74,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public boolean remove(@CheckForNull Object key, @CheckForNull Object value) {
-		this.logModify("remove(Object, Object)");
+		this.logModify("remove(Object, Object)", Log.LOG_STRATEGY.test(value));
 		try {
 			return this.wrapped.remove(key, value);
 		} catch (RuntimeException e) {
@@ -82,7 +84,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public boolean putAll(K key, Iterable<? extends V> values) {
-		this.logModify("putAll(Object, Iterable)");
+		this.logModify("putAll(Object, Iterable)", Stream.of(values).anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.putAll(key, values);
 		} catch (RuntimeException e) {
@@ -92,7 +94,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public boolean putAll(Multimap<? extends K, ? extends V> m) {
-		this.logModify("putAll(Multimap)");
+		this.logModify("putAll(Multimap)", m.values().stream().anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.putAll(m);
 		} catch (RuntimeException e) {
@@ -102,7 +104,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public Collection<V> replaceValues(K key, Iterable<? extends V> values) {
-		this.logModify("replaceValues(Object, Iterable)");
+		this.logModify("replaceValues(Object, Iterable)", Stream.of(values).anyMatch(Log.LOG_STRATEGY));
 		try {
 			return this.wrapped.replaceValues(key, values);
 		} catch (RuntimeException e) {
@@ -112,7 +114,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public Collection<V> removeAll(@CheckForNull Object key) {
-		this.logModify("removeAll(Object)");
+		this.logModify("removeAll(Object)", Log.LOG_STRATEGY.logAnyway());
 		try {
 			return this.wrapped.removeAll(key);
 		} catch (RuntimeException e) {
@@ -122,7 +124,7 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public void clear() {
-		this.logModify("clear()");
+		this.logModify("clear()", Log.LOG_STRATEGY.logAnyway());
 		try {
 			this.wrapped.clear();
 		} catch (RuntimeException e) {
@@ -132,25 +134,25 @@ public class WrappedMultimap<K, V> extends AbstractWrappedContainer<Multimap<K, 
 
 	@Override
 	public Set<K> keySet() {
-		this.logQuery("keySet()");
+		this.logQuery("keySet()", Log.LOG_STRATEGY.logAnyway());
 		return new WrappedSet<>(this.wrapped.keySet(), this.traceId);
 	}
 
 	@Override
 	public Multiset<K> keys() {
-		this.logQuery("keys()");
+		this.logQuery("keys()", Log.LOG_STRATEGY.logAnyway());
 		return new WrappedMultiset<>(this.wrapped.keys(), this.traceId);
 	}
 
 	@Override
 	public Collection<V> values() {
-		this.logQuery("values()");
+		this.logQuery("values()", Log.LOG_STRATEGY.logAnyway());
 		return this.wrapped.values();
 	}
 
 	@Override
 	public Collection<Map.Entry<K, V>> entries() {
-		this.logQuery("entries()");
+		this.logQuery("entries()", Log.LOG_STRATEGY.logAnyway());
 		return this.wrapped.entries();
 	}
 
