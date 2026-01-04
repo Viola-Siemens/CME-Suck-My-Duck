@@ -31,7 +31,7 @@ public class WrapLocalContainerTransformer implements ClassFileTransformer {
 			try {
 				Containers.logger.info("Found class " + this.className + ".");
 				ClassReader reader = new ClassReader(classFileBuffer);
-				ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+				ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 				reader.accept(new ClassVisitor(CMESuckMyDuck.ASM_API_VERSION, writer) {
 					@Override
 					public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
