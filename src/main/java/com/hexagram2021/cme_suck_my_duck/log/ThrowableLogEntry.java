@@ -39,7 +39,7 @@ public class ThrowableLogEntry extends AbstractLogEntry {
 				logEnclosedStackTrace(writer, ourCause, trace, CAUSE_CAPTION, "", dejaVu);
 			}
 		} catch (Exception e) {
-			System.err.printf("Error writing log: %s\n", e);
+			System.err.printf("Error writing log: %s%n", e);
 		}
 	}
 

@@ -8,7 +8,11 @@ import java.util.Objects;
 public enum LogStrategies implements LogStrategy {
 	ALL(o -> true, true),
 	NULL(Objects::isNull),
-	NOT_NULL(Objects::nonNull);
+	NOT_NULL(Objects::nonNull),
+	ZERO(o -> o instanceof Number && NumberFunctions.is((Number)o, 0)),
+	NEGATIVE_ONE(o -> o instanceof Number && NumberFunctions.is((Number)o, -1)),
+	TRUE(o -> o instanceof Boolean && (Boolean)o),
+	FALSE(o -> o instanceof Boolean && !(Boolean)o);
 
 	@Override
 	public boolean test(@Nullable Object o) {

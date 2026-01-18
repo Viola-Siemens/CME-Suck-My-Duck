@@ -19,7 +19,7 @@ public class StringLogEntry extends AbstractLogEntry {
 			writer.write(out);
 			writer.flush();
 		} catch (Exception e) {
-			System.err.printf("Error writing log: %s\n", e);
+			System.err.printf("Error writing log: %s%n", e);
 		}
 	}
 }

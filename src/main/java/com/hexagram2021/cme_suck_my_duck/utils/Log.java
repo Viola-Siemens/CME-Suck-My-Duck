@@ -14,8 +14,9 @@ import java.util.Date;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "java:S2696"})
 public final class Log {
+	@SuppressWarnings({"java:S1444", "java:S3008"})
 	@Nullable
 	public static Log INSTANCE = null;
 	static final int LOG_LEVEL;
@@ -29,6 +30,7 @@ public final class Log {
 
 	public static final LogStrategies LOG_STRATEGY;
 
+	@SuppressWarnings("java:S2885")
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
 	private final Queue<AbstractLogEntry> toLogs = new ConcurrentLinkedDeque<>();
@@ -36,6 +38,7 @@ public final class Log {
 	private final StandardOpenOption[] openOptions;
 	private Writer writer;
 
+	@SuppressWarnings("java:S3010")
 	public Log(String path, StandardOpenOption... openOptions) {
 		this.path = path;
 		this.openOptions = openOptions;
@@ -54,7 +57,7 @@ public final class Log {
 			return Files.newBufferedWriter(path, StandardCharsets.UTF_8, openOptions);
 		} catch (Exception e) {
 			//e.printStackTrace();
-			throw new IllegalStateException("Error setting log file.\n", e);
+			throw new IllegalStateException("Error setting log file.", e);
 		}
 	}
 
@@ -255,10 +258,10 @@ public final class Log {
 					}
 				}
 			} catch (InterruptedException e) {
-				System.err.printf("Error sleeping log thread: %s\n", e);
+				System.err.printf("Error sleeping log thread: %s%n", e);
 				Thread.currentThread().interrupt();
 			} catch (Exception e) {
-				System.err.printf("Error writing log: %s\n", e);
+				System.err.printf("Error writing log: %s%n", e);
 			}
 		}
 		try {
@@ -280,7 +283,7 @@ public final class Log {
 				INSTANCE.writer.close();
 			}
 		} catch (InterruptedException e) {
-			System.err.printf("Error sleeping log thread: %s\n", e);
+			System.err.printf("Error sleeping log thread: %s%n", e);
 			Thread.currentThread().interrupt();
 		} catch (Exception ignored) {
 		}
