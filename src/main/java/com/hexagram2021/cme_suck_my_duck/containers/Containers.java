@@ -4,6 +4,7 @@ import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedIterator;
 import com.hexagram2021.cme_suck_my_duck.containers.iterators.WrappedListIterator;
 import com.hexagram2021.cme_suck_my_duck.utils.Log;
 
+import javax.annotation.Nullable;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
 
@@ -14,6 +15,9 @@ public final class Containers {
 	public static final Log logger;
 	static final boolean TRANSFORM_TO_THREAD_SAFE;
 	public static final boolean OUTPUT_CLASS_BINARY;
+
+	@Nullable
+	public static final String TRACE_MESSAGE_FACTORY;
 	
 	public static <T> List<T> newWrappedList(Object wrapped) {
 		try {
@@ -120,6 +124,7 @@ public final class Containers {
 		} else {
 			logger = Log.INSTANCE;
 		}
+
 		boolean fixConcurrent = false;
 		try {
 			fixConcurrent = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.transform_to_thread_safe"));
@@ -127,6 +132,7 @@ public final class Containers {
 			// Ignored
 		}
 		TRANSFORM_TO_THREAD_SAFE = fixConcurrent;
+
 		boolean outputClassBinary = false;
 		try {
 			outputClassBinary = Boolean.parseBoolean(System.getProperty("cme_suck_my_duck.output_class_binary"));
@@ -134,5 +140,7 @@ public final class Containers {
 			// Ignored
 		}
 		OUTPUT_CLASS_BINARY = outputClassBinary;
+
+		TRACE_MESSAGE_FACTORY = System.getProperty("cme_suck_my_duck.trace_message_factory");
 	}
 }

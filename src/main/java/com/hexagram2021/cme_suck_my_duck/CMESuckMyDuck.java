@@ -14,11 +14,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
 import static com.hexagram2021.cme_suck_my_duck.utils.SharedConstants.LOG_PATH;
 
+/**
+ * Agent 入口
+ * @author liudongyu
+ */
 public class CMESuckMyDuck {
 	private static final Gson GSON = new Gson();
 	private static final Log logger = new Log(LOG_PATH, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
@@ -36,6 +41,10 @@ public class CMESuckMyDuck {
 
 	public static final boolean INJECT_DIRECTLY_RETURN;
 
+	/**
+	 * 主函数
+	 * @param args 参数
+	 */
 	public static void main(String[] args) {
 		if(args.length == 3) {
 			try(FileInputStream is = new FileInputStream(args[0]);
@@ -88,8 +97,15 @@ public class CMESuckMyDuck {
 		System.out.println("\tDefault <bool>=true. If false, it still keeps logging after critical exception being thrown.");
 		System.out.println(" -Dcme_suck_my_duck.trace_id_updater=<class full name>;<method name>");
 		System.out.println("\tDefault empty string. If not empty, the given method will also be called to update trace id, which might be useful in `inject_method` mode.");
+		System.out.println(" -Dcme_suck_my_duck.trace_message_factory=<opcode>;<class full name>;<method name>;<method return type>;<is interface>");
+		System.out.println("\tDefault empty string. If not empty, this method will be called and the return value will be logged, which might be useful in `inject_method` mode. For example: `-Dcme_suck_my_duck.trace_message_factory=182;java/lang/Thread;getName;Ljava/lang/String?;false -javaagent:mods/CMESuckMyDuck-1.2.0.jar=java/lang/Thread;start()V`");
 	}
 
+	/**
+	 * Java agent 主函数
+	 * @param agentArg 参数
+	 * @param inst 运行时监控与修改器
+	 */
 	public static void premain(String agentArg, Instrumentation inst) {
 		//Pre-Load
 		try (InputStream is = CMESuckMyDuck.class.getResourceAsStream("/meta.json")) {
@@ -106,6 +122,7 @@ public class CMESuckMyDuck {
 			return;
 		}
 		inst.addTransformer(transformer, true);
+		retransformIfLoaded(inst, args[0]);
 
 		if(TRACE_ID_UPDATER != null && !TRACE_ID_UPDATER.isEmpty()) {
 			String[] updaterArgs = TRACE_ID_UPDATER.split(";");
@@ -133,6 +150,8 @@ public class CMESuckMyDuck {
 			}
 			// net.minecraft.client.renderer.item.ItemProperties => net/minecraft/client/renderer/item/ItemProperties
 			args[0] = args[0].replace(".", "/");
+			// launch([Ljava.lang.String?)V => launch([Ljava.lang.String;)V
+			args[1] = args[1].replace("?", ";");
 			// Inject method Main
 			transformer = new InjectLogTransformer(args[0], args[1]);
 			logger.info("Successfully build transformer for method %s of class %s.", args[1], args[0]);
@@ -165,6 +184,32 @@ public class CMESuckMyDuck {
 			logger.info("Successfully build transformer for field %s of class %s, type %s, phase %s.", args[1], args[0], args[2], args[3]);
 		}
 		return transformer;
+	}
+
+	/**
+	 * 如果目标类已经被 JVM 加载，则通过 {@link Instrumentation#retransformClasses} 触发重新转换喵~
+	 *
+	 * @param inst      Instrumentation 实例喵~
+	 * @param className 目标类全限定名（以 / 分隔）喵~
+	 */
+	private static void retransformIfLoaded(Instrumentation inst, String className) {
+		String dottedName = className.replace("/", ".");
+		for (Class<?> clazz : inst.getAllLoadedClasses()) {
+			if (clazz.getName().equals(dottedName)) {
+				if (inst.isModifiableClass(clazz)) {
+					try {
+						inst.retransformClasses(clazz);
+						logger.info("Target class %s was already loaded, retransforming.", dottedName);
+					} catch (UnmodifiableClassException e) {
+						logger.error("Failed to retransform class %s.", dottedName);
+						logger.error(e);
+					}
+				} else {
+					logger.warn("Target class %s is already loaded but is not modifiable.", dottedName);
+				}
+				return;
+			}
+		}
 	}
 
 	static {

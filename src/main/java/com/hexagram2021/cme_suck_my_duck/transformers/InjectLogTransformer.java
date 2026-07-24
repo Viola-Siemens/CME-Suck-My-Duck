@@ -58,7 +58,29 @@ public class InjectLogTransformer implements ClassFileTransformer {
 										}
 									} else {
 										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceIdGenerator", "getGlobalTraceId", "()Ljava/lang/String;", false);
-										this.visitLdcInsn("Trace");
+										if(Containers.TRACE_MESSAGE_FACTORY == null) {
+											this.visitLdcInsn("Trace");
+										} else {
+											try {
+												String[] visitParams = Containers.TRACE_MESSAGE_FACTORY.split(";");
+												int opcode = Integer.parseInt(visitParams[0]);
+												if(opcode == Opcodes.INVOKEVIRTUAL) {
+													this.visitVarInsn(Opcodes.ALOAD, 0);
+												} else if(opcode != Opcodes.INVOKESTATIC) {
+													throw new IllegalArgumentException("Opcode " + opcode + " is not supported.");
+												}
+												this.visitMethodInsn(opcode, visitParams[1], visitParams[2], "()" + visitParams[3].replace("?", ";"), Boolean.parseBoolean(visitParams[4]));
+												if(visitParams[3].length() == 1) {
+													this.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/String", "valueOf", "(" + visitParams[3] + ")Ljava/lang/String;", false);
+												} else {
+													this.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/String", "valueOf", "(Ljava/lang/Object;)Ljava/lang/String;", false);
+												}
+											} catch (Exception e) {
+												Containers.logger.error("Failed to parse trace message factory. Using the default constant.");
+												Containers.logger.error(e);
+												this.visitLdcInsn("Trace");
+											}
+										}
 										this.visitMethodInsn(Opcodes.INVOKESTATIC, "com/hexagram2021/cme_suck_my_duck/utils/TraceLogger", "info", "(Ljava/lang/String;Ljava/lang/String;)V", false);
 									}
 									Containers.logger.info("Injected.");

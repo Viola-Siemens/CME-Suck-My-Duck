@@ -42,16 +42,18 @@ public class WrapContainerTransformer implements ClassFileTransformer {
 								Containers.logger.info("Found injection point in method <clinit>.");
 								return new MethodVisitor(CMESuckMyDuck.ASM_API_VERSION, mv) {
 									@Override
-									public void visitInsn(int opcode) {
-										if (opcode == Opcodes.RETURN) {
+									public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+										super.visitFieldInsn(opcode, owner, name, descriptor);
+										if (opcode == Opcodes.PUTSTATIC &&
+												owner.equals(WrapContainerTransformer.this.className) &&
+												name.equals(WrapContainerTransformer.this.fieldName)) {
 											Containers.logger.info("Injecting...");
-											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
-											this.visitFieldInsn(Opcodes.GETSTATIC, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
-											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-											this.visitFieldInsn(Opcodes.PUTSTATIC, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
+											super.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
+											super.visitFieldInsn(Opcodes.GETSTATIC, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
+											super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+											super.visitFieldInsn(Opcodes.PUTSTATIC, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
 											Containers.logger.info("Injected.");
 										}
-										super.visitInsn(opcode);
 									}
 								};
 							}
@@ -60,18 +62,20 @@ public class WrapContainerTransformer implements ClassFileTransformer {
 								Containers.logger.info("Found injection point in method <init>.");
 								return new MethodVisitor(CMESuckMyDuck.ASM_API_VERSION, mv) {
 									@Override
-									public void visitInsn(int opcode) {
-										if (opcode == Opcodes.RETURN) {
+									public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+										super.visitFieldInsn(opcode, owner, name, descriptor);
+										if (opcode == Opcodes.PUTFIELD &&
+												owner.equals(WrapContainerTransformer.this.className) &&
+												name.equals(WrapContainerTransformer.this.fieldName)) {
 											Containers.logger.info("Injecting...");
-											this.visitVarInsn(Opcodes.ALOAD, 0);
-											this.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
-											this.visitVarInsn(Opcodes.ALOAD, 0);
-											this.visitFieldInsn(Opcodes.GETFIELD, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
-											this.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
-											this.visitFieldInsn(Opcodes.PUTFIELD, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
+											super.visitVarInsn(Opcodes.ALOAD, 0);
+											super.visitFieldInsn(Opcodes.GETSTATIC, "com/hexagram2021/cme_suck_my_duck/Type", WrapContainerTransformer.this.type.name(), "Lcom/hexagram2021/cme_suck_my_duck/Type;");
+											super.visitVarInsn(Opcodes.ALOAD, 0);
+											super.visitFieldInsn(Opcodes.GETFIELD, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
+											super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "com/hexagram2021/cme_suck_my_duck/Type", "construct", "(Ljava/lang/Object;)Ljava/lang/Object;", false);
+											super.visitFieldInsn(Opcodes.PUTFIELD, WrapContainerTransformer.this.className, WrapContainerTransformer.this.fieldName, WrapContainerTransformer.this.type.getTypeFullClassName());
 											Containers.logger.info("Injected.");
 										}
-										super.visitInsn(opcode);
 									}
 								};
 							}
