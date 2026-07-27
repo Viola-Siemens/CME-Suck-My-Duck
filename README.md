@@ -1,3 +1,5 @@
+[![Modrinth](https://img.shields.io/modrinth/dt/cme-is-bad?logo=modrinth&style=flat&color=242629&labelColor=5ca424&logoColor=1c1c1c)](https://modrinth.com/mod/cme-is-bad)
+
 # CME-Suck-My-Duck
 Output all stack traces when modifying a certain collection for debugging `ConcurrentModificationException` and `IndexOutOfBoundsException`.
 
