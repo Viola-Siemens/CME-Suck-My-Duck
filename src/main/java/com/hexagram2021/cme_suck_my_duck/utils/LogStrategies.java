@@ -5,10 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * 日志策略，用于简化日志输出，只保留特定参数的修改操作
+ *
+ * @author liudongyu
+ */
 public enum LogStrategies implements LogStrategy {
 	ALL(o -> true, true),
 	NULL(Objects::isNull),
 	NOT_NULL(Objects::nonNull),
+	ONE(o -> o instanceof Number && NumberFunctions.is((Number)o, 1)),
 	ZERO(o -> o instanceof Number && NumberFunctions.is((Number)o, 0)),
 	NEGATIVE_ONE(o -> o instanceof Number && NumberFunctions.is((Number)o, -1)),
 	TRUE(o -> o instanceof Boolean && (Boolean)o),
@@ -19,6 +25,10 @@ public enum LogStrategies implements LogStrategy {
 		return this.predicate.test(o);
 	}
 
+	/**
+	 * 是否无需判断直接输出
+	 * @return 是否直接输出
+	 */
 	public boolean logAnyway() {
 		return this.logAnyway;
 	}
@@ -37,6 +47,11 @@ public enum LogStrategies implements LogStrategy {
 		this.logAnyway = logAnyway;
 	}
 
+	/**
+	 * 根据名字获取策略
+	 * @param name 策略名字
+	 * @return 策略
+	 */
 	public static LogStrategies of(String name) {
 		return BY_NAME.getOrDefault(name, ALL);
 	}
