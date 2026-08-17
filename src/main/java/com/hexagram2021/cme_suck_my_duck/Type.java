@@ -28,6 +28,7 @@ public enum Type {
 	OBJECT_2_INT_MAP("Object2IntMap", "Lit/unimi/dsi/fastutil/objects/Object2IntMap;", object -> FastContainers.newObject2IntWrappedMap(object)),
 	LONG_2_OBJECT_MAP("Long2ObjectMap", "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;", object -> FastContainers.newLong2ObjectWrappedMap(object)),
 	OBJECT_2_LONG_MAP("Object2LongMap", "Lit/unimi/dsi/fastutil/objects/Object2LongMap;", object -> FastContainers.newObject2LongWrappedMap(object)),
+	OBJECT_2_FLOAT_MAP("Object2FloatMap", "Lit/unimi/dsi/fastutil/objects/Object2FloatMap;", object -> FastContainers.newObject2FloatWrappedMap(object)),
 	INT_ITERATOR("IntIterator", "Lit/unimi/dsi/fastutil/ints/IntIterator;", object -> FastContainers.newIntIterator(object)),
 	LONG_ITERATOR("LongIterator", "Lit/unimi/dsi/fastutil/longs/LongIterator;", object -> FastContainers.newLongIterator(object)),
 	OBJECT_ITERATOR("ObjectIterator", "Lit/unimi/dsi/fastutil/objects/ObjectIterator;", object -> FastContainers.newObjectIterator(object)),

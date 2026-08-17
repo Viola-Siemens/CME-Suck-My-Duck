@@ -154,6 +154,20 @@ public final class FastContainers {
 		}
 		return Object2LongMaps.emptyMap();
 	}
+	public static <K> Object2FloatMap<K> newObject2FloatWrappedMap(Object wrapped) {
+		try {
+			if(Log.canWrap()) {
+				if(TRANSFORM_TO_THREAD_SAFE) {
+					return Object2FloatMaps.synchronize((Object2FloatMap<K>) wrapped);
+				}
+				return new Object2FloatWrappedMap<>((Object2FloatMap<K>) wrapped);
+			}
+			return (Object2FloatMap<K>) wrapped;
+		} catch (ClassCastException e) {
+			logger.fatal(e);
+		}
+		return Object2FloatMaps.emptyMap();
+	}
 	public static IntIterator newIntIterator(Object wrapped) {
 		try {
 			if(Log.canWrap()) {
